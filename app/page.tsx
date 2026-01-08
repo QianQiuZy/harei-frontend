@@ -1,72 +1,184 @@
 'use client';
 
-import { motion } from 'framer-motion';
+import { useEffect, useMemo, useState } from 'react';
 
-import { Button } from '@/components/ui/button';
+type LiveStatus = {
+  status: number | null;
+  liveTime?: number | null;
+};
 
-const sections = [
-  {
-    title: '基础架构',
-    description: '基于 Next.js App Router 的静态页面骨架，支持扩展模块化页面与组件。'
-  },
-  {
-    title: '静态资源',
-    description: '统一使用 public/images 作为图片与静态文件存放路径，便于管理与部署。'
-  },
-  {
-    title: '组件与动效',
-    description: '采用 Shadcn UI + Tailwind CSS 构建界面，并使用 Framer Motion 做交互动画。'
+const RANDOM_TEXTS = ['今天也要开心呀', '欢迎来到花礼的小空间', '一起期待下一次开播吧', '愿你每日好心情'];
+
+const MS_PER_DAY = 24 * 60 * 60 * 1000;
+
+const getUtc8Timestamp = (timestamp: number) => {
+  const offsetMinutes = new Date(timestamp).getTimezoneOffset();
+  const utcTime = timestamp + offsetMinutes * 60 * 1000;
+  return utcTime + 8 * 60 * 60 * 1000;
+};
+
+const getUtc8Date = (timestamp: number) => {
+  const utc8Timestamp = getUtc8Timestamp(timestamp);
+  return new Date(utc8Timestamp);
+};
+
+const getUtc8DayStart = (timestamp: number) => {
+  const utc8Date = getUtc8Date(timestamp);
+  return Date.UTC(
+    utc8Date.getUTCFullYear(),
+    utc8Date.getUTCMonth(),
+    utc8Date.getUTCDate()
+  );
+};
+
+const parseLiveTime = (value?: string) => {
+  if (!value) return null;
+  const [datePart, timePart] = value.trim().split(' ');
+  if (!datePart || !timePart) return null;
+  const [year, month, day] = datePart.split('-').map(Number);
+  const [hour, minute, second] = timePart.split(':').map(Number);
+  if ([year, month, day, hour, minute, second].some((item) => Number.isNaN(item))) {
+    return null;
   }
-];
+  return Date.UTC(year, month - 1, day, hour - 8, minute, second);
+};
+
+const formatDuration = (milliseconds: number) => {
+  const totalSeconds = Math.max(0, Math.floor(milliseconds / 1000));
+  const hours = Math.floor(totalSeconds / 3600)
+    .toString()
+    .padStart(2, '0');
+  const minutes = Math.floor((totalSeconds % 3600) / 60)
+    .toString()
+    .padStart(2, '0');
+  const seconds = Math.floor(totalSeconds % 60)
+    .toString()
+    .padStart(2, '0');
+  return `${hours}:${minutes}:${seconds}`;
+};
 
 export default function HomePage() {
+  const [now, setNow] = useState(() => Date.now());
+  const [liveStatus, setLiveStatus] = useState<LiveStatus>({ status: null, liveTime: null });
+  const randomText = useMemo(
+    () => RANDOM_TEXTS[Math.floor(Math.random() * RANDOM_TEXTS.length)],
+    []
+  );
+
+  useEffect(() => {
+    const timer = setInterval(() => setNow(Date.now()), 1000);
+    return () => clearInterval(timer);
+  }, []);
+
+  useEffect(() => {
+    let isMounted = true;
+
+    const fetchStatus = async () => {
+      try {
+        const response = await fetch('/live/status', { cache: 'no-store' });
+        if (!response.ok) {
+          throw new Error('live status failed');
+        }
+        const data = (await response.json()) as { status?: number; live_time?: string };
+        const liveTime = parseLiveTime(data.live_time);
+        if (isMounted) {
+          setLiveStatus({ status: typeof data.status === 'number' ? data.status : 0, liveTime });
+        }
+      } catch (error) {
+        if (isMounted) {
+          setLiveStatus({ status: 0, liveTime: null });
+        }
+      }
+    };
+
+    fetchStatus();
+    const interval = setInterval(fetchStatus, 30000);
+
+    return () => {
+      isMounted = false;
+      clearInterval(interval);
+    };
+  }, []);
+
+  const nowUtc8DayStart = getUtc8DayStart(now);
+  const debutStart = Date.UTC(2024, 6, 16);
+  const debutDays = Math.max(0, Math.floor((nowUtc8DayStart - debutStart) / MS_PER_DAY));
+
+  const utc8Date = getUtc8Date(now);
+  const currentYear = utc8Date.getUTCFullYear();
+  const birthdayThisYear = Date.UTC(currentYear, 2, 1);
+  const birthdayTarget = nowUtc8DayStart > birthdayThisYear
+    ? Date.UTC(currentYear + 1, 2, 1)
+    : birthdayThisYear;
+
+  const debutAnniversaryThisYear = Date.UTC(currentYear, 6, 16);
+  const debutAnniversaryTarget = nowUtc8DayStart > debutAnniversaryThisYear
+    ? Date.UTC(currentYear + 1, 6, 16)
+    : debutAnniversaryThisYear;
+
+  const birthdayDiff = Math.floor((birthdayTarget - nowUtc8DayStart) / MS_PER_DAY);
+  const debutAnniversaryDiff = Math.floor(
+    (debutAnniversaryTarget - nowUtc8DayStart) / MS_PER_DAY
+  );
+
+  const isBirthday = nowUtc8DayStart === birthdayThisYear;
+  const isDebutAnniversary = nowUtc8DayStart === debutAnniversaryThisYear;
+
+  const liveText =
+    liveStatus.status === 1 && liveStatus.liveTime
+      ? `开播中 ${formatDuration(now - liveStatus.liveTime)}`
+      : '未开播';
+
   return (
-    <div className="page">
-      <section className="hero" id="overview">
-        <div>
-          <p className="eyebrow">静态前端架构</p>
-          <h1>React + Next.js 静态界面基础工程</h1>
-          <p className="lead">
-            已预置核心目录结构、全局布局与样式，并配置静态资源目录。
-          </p>
-          <div className="hero-actions">
-            <Button>开始扩展页面</Button>
-            <Button variant="outline">查看目录结构</Button>
+    <div className="home-page">
+      <img
+        src="/images/avatar.jpg"
+        alt="花礼Harei头像"
+        className="home-avatar"
+      />
+      <div className="home-title">花礼Harei</div>
+      <img
+        src="/images/bilibili.png"
+        alt="bilibili"
+        className="home-bilibili"
+      />
+      <div className="info-box">开播状态：{liveText}</div>
+      <div className="countdown-wrapper" tabIndex={0}>
+        <div className="info-box">纪念日倒计时</div>
+        <div className="countdown-pop">
+          <div>花礼Harei已出道{debutDays}天</div>
+          <div>
+            {isBirthday
+              ? '祝花礼Harei生日快乐！'
+              : `距离花礼Harei生日还剩${birthdayDiff}天`}
+          </div>
+          <div>
+            {isDebutAnniversary
+              ? '祝花礼Harei周年快乐！'
+              : `距离花礼Harei出道日还剩${debutAnniversaryDiff}天`}
           </div>
         </div>
-        <motion.div
-          className="hero-card"
-          id="assets"
-          initial={{ opacity: 0, y: 16 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ duration: 0.4 }}
-        >
-          <h2>静态资源目录</h2>
-          <p>
-            图片与静态文件请放置于 <code>public/images</code>，可通过
-            <code>/images/xxx.png</code> 访问。
-          </p>
-          <div className="placeholder">示例占位区域</div>
-        </motion.div>
-      </section>
-
-      <section className="grid" id="sections">
-        {sections.map((section) => (
-          <article className="card" key={section.title}>
-            <h3>{section.title}</h3>
-            <p>{section.description}</p>
-          </article>
-        ))}
-      </section>
-
-      <section className="note">
-        <h2>下一步建议</h2>
-        <ul>
-          <li>在 app/ 目录下新增页面（如 app/about/page.tsx）。</li>
-          <li>在 components/ 目录下沉淀通用组件并引入到页面。</li>
-          <li>将品牌图片、图标等静态文件放入 public/images。</li>
-        </ul>
-      </section>
+      </div>
+      <div className="home-links">
+        <a className="home-link" href="/music">
+          <img src="/images/music-l.png" alt="歌单" className="home-link-icon" />
+          <span>歌单</span>
+        </a>
+        <a className="home-link" href="/box">
+          <img src="/images/box-l.png" alt="提问箱" className="home-link-icon" />
+          <span>提问箱</span>
+        </a>
+        <a className="home-link" href="/huangdou">
+          <img src="/images/huangdou.png" alt="豆力榜" className="home-link-icon" />
+          <span>豆力榜</span>
+        </a>
+      </div>
+      <div className="home-random-text">{randomText}</div>
+      <div className="home-beian">
+        <a href="https://beian.miit.gov.cn" target="_blank" rel="noreferrer noopener">
+          陕ICP备2024053986号-1
+        </a>
+      </div>
     </div>
   );
 }
