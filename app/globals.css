@@ -553,14 +553,14 @@ a {
 
 .box-grid {
   display: grid;
-  grid-template-columns: 1fr 20%;
+  grid-template-columns: minmax(0, 1fr) auto;
   grid-template-areas:
     "header tag"
     "input input"
     "hint hint"
     "upload upload"
-    "alert alert"
-    "submit submit";
+    "submit submit"
+    "alert alert";
   column-gap: 16px;
   row-gap: 18px;
   align-items: center;
@@ -594,6 +594,7 @@ a {
   font-size: 14px;
   color: #374151;
   grid-area: tag;
+  justify-self: end;
 }
 
 .box-select {
@@ -667,12 +668,19 @@ a {
 }
 
 .box-alert {
-  width: 90%;
+  width: 100%;
   padding: 10px 14px;
   border-radius: 12px;
   background: #fee2e2;
   color: #b91c1c;
   font-size: 14px;
+}
+
+.box-alert-slot {
+  width: 90%;
+  min-height: 44px;
+  display: flex;
+  align-items: center;
   grid-area: alert;
 }
 
@@ -846,8 +854,8 @@ a {
       "tag"
       "hint"
       "upload"
-      "alert"
-      "submit";
+      "submit"
+      "alert";
   }
 
   .box-select,
@@ -855,6 +863,7 @@ a {
   .box-hint-row,
   .box-upload,
   .box-alert,
+  .box-alert-slot,
   .box-submit,
   .box-tag {
     width: 100%;
