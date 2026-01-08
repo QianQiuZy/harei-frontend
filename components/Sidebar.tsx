@@ -72,16 +72,6 @@ export const Sidebar = () => {
 
       <aside className={`sidebar ${open ? 'is-open' : ''}`} aria-hidden={!open}>
         <div className="sidebar-header">
-          <button
-            type="button"
-            className="sidebar-trigger is-inside"
-            aria-label={open ? '关闭侧边栏' : '打开侧边栏'}
-            onClick={handleToggle}
-          >
-            <span className="sidebar-trigger-bar" />
-            <span className="sidebar-trigger-bar" />
-            <span className="sidebar-trigger-bar" />
-          </button>
           <div className="sidebar-switch">
             <span className="sidebar-switch-label">背景切换</span>
             <button
