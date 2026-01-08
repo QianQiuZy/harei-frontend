@@ -143,7 +143,7 @@ export default function BoxPage() {
 
   const handleFilesChange = (fileList: FileList | File[]) => {
     const nextFiles = Array.from(fileList);
-    setFiles(nextFiles);
+    setFiles((currentFiles) => currentFiles.concat(nextFiles));
   };
 
   const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
@@ -294,7 +294,9 @@ export default function BoxPage() {
           </div>
           {includeImage && (
             <div
-              className={`box-upload${isDragOver ? ' is-dragover' : ''}`}
+              className={`box-upload${isDragOver ? ' is-dragover' : ''}${
+                previewUrls.length > 0 ? ' has-files' : ''
+              }`}
               onDragOver={(event) => {
                 event.preventDefault();
                 setIsDragOver(true);
@@ -310,12 +312,14 @@ export default function BoxPage() {
                 }
               }}
             >
-              <div>拖拽/点击添加图片(总和最大50MB)</div>
+              <div className="box-upload-title">拖拽/点击添加图片(总和最大50MB)</div>
               {previewUrls.length > 0 && (
                 <div className="box-upload-thumbs">
                   {previewUrls.map((url, index) => (
                     <div className="box-upload-thumb" key={url}>
-                      <img src={url} alt={`已选择图片${index + 1}`} />
+                      <div className="box-upload-thumb-image">
+                        <img src={url} alt={`已选择图片${index + 1}`} />
+                      </div>
                       <button
                         type="button"
                         className="box-upload-remove"
@@ -341,6 +345,7 @@ export default function BoxPage() {
                   if (event.target.files) {
                     handleFilesChange(event.target.files);
                   }
+                  event.target.value = '';
                 }}
               />
             </div>
