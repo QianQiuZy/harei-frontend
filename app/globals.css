@@ -192,10 +192,10 @@ a {
 }
 
 .sidebar-icon-wrap {
-  width: 28px;
-  height: 28px;
-  border-radius: 8px;
-  background: transparent;
+  width: 40px;
+  height: 40px;
+  border-radius: 10px;
+  background: #f3f4f6;
   display: inline-flex;
   align-items: center;
   justify-content: center;
@@ -203,8 +203,8 @@ a {
 }
 
 .sidebar-icon {
-  width: 18px;
-  height: 18px;
+  width: 36px;
+  height: 36px;
 }
 
 .sidebar-overlay {
