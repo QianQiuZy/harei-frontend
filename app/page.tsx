@@ -1,3 +1,5 @@
+'use client';
+
 import { motion } from 'framer-motion';
 
 import { Button } from '@/components/ui/button';
@@ -60,7 +62,7 @@ export default function HomePage() {
       <section className="note">
         <h2>下一步建议</h2>
         <ul>
-          <li>在 app/ 目录下新增页面（如 app/about/page.jsx）。</li>
+          <li>在 app/ 目录下新增页面（如 app/about/page.tsx）。</li>
           <li>在 components/ 目录下沉淀通用组件并引入到页面。</li>
           <li>将品牌图片、图标等静态文件放入 public/images。</li>
         </ul>
