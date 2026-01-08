@@ -610,6 +610,16 @@ a {
   border-bottom: 1px solid #e5e7eb;
 }
 
+.huangdou-list-header {
+  font-weight: 600;
+  color: #111827;
+  background: rgba(15, 23, 42, 0.04);
+}
+
+.huangdou-list-header .huangdou-list-count {
+  color: #111827;
+}
+
 .huangdou-list-name {
   font-weight: 500;
 }
