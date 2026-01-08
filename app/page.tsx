@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useEffect, useState } from 'react';
 
 type LiveStatus = {
   status: number | null;
@@ -64,12 +64,10 @@ const formatDuration = (milliseconds: number) => {
 export default function HomePage() {
   const [now, setNow] = useState(() => Date.now());
   const [liveStatus, setLiveStatus] = useState<LiveStatus>({ status: null, liveTime: null });
-  const randomText = useMemo(
-    () => RANDOM_TEXTS[Math.floor(Math.random() * RANDOM_TEXTS.length)],
-    []
-  );
+  const [randomText, setRandomText] = useState(() => RANDOM_TEXTS[0]);
 
   useEffect(() => {
+    setRandomText(RANDOM_TEXTS[Math.floor(Math.random() * RANDOM_TEXTS.length)]);
     const timer = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(timer);
   }, []);

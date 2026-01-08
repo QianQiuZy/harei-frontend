@@ -43,7 +43,7 @@ export const useBackgroundAnimation = (): AnimationSetting => {
     () => (pathname.startsWith('/admin') ? 'admin' : 'front'),
     [pathname]
   );
-  const [enabled, setEnabled] = useState(() => readSetting(area));
+  const [enabled, setEnabled] = useState(() => getDefaultEnabled(area));
 
   useEffect(() => {
     setEnabled(readSetting(area));
