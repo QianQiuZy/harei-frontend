@@ -53,8 +53,8 @@ a {
   position: fixed;
   top: 24px;
   left: 24px;
-  width: 88px;
-  height: 88px;
+  width: 24px;
+  height: 28px;
   border-radius: 16px;
   border: none;
   background: transparent;
@@ -67,7 +67,7 @@ a {
   z-index: 30;
   box-shadow: none;
   backdrop-filter: none;
-  transition: transform 0.2s ease;
+  transition: transform 0.3s ease;
 }
 
 .sidebar-trigger:hover {
@@ -82,8 +82,8 @@ a {
 
 .sidebar-trigger-bar {
   display: block;
-  width: 36px;
-  height: 4px;
+  width: 30px;
+  height: 6px;
   background: #111827;
   border-radius: 999px;
 }
