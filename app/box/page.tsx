@@ -317,10 +317,12 @@ export default function BoxPage() {
               />
             </div>
           )}
-          {alertMessage && <div className="box-alert">{alertMessage}</div>}
           <button className="box-submit" type="button" onClick={handleSubmit}>
             提交
           </button>
+          <div className="box-alert-slot" aria-live="polite">
+            {alertMessage && <div className="box-alert">{alertMessage}</div>}
+          </div>
         </div>
         {isUploading && (
           <div className="box-loading" aria-live="polite">
