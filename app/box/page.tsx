@@ -24,6 +24,7 @@ export default function BoxPage() {
   const [message, setMessage] = useState('');
   const [includeImage, setIncludeImage] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
+  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const [resultMessage, setResultMessage] = useState<string | null>(null);
@@ -88,10 +89,14 @@ export default function BoxPage() {
     [files]
   );
 
-  const totalSizeText = useMemo(() => {
-    if (files.length === 0) return '';
-    return `已选择${files.length}张，合计${(totalSize / 1024 / 1024).toFixed(2)}MB`;
-  }, [files, totalSize]);
+  useEffect(() => {
+    const nextUrls = files.map((file) => URL.createObjectURL(file));
+    setPreviewUrls(nextUrls);
+
+    return () => {
+      nextUrls.forEach((url) => URL.revokeObjectURL(url));
+    };
+  }, [files]);
 
   const showAlert = (text: string) => {
     setAlertMessage(text);
@@ -148,6 +153,10 @@ export default function BoxPage() {
       setIncludeImage(true);
       handleFilesChange(event.dataTransfer.files);
     }
+  };
+
+  const handleRemoveFile = (index: number) => {
+    setFiles((currentFiles) => currentFiles.filter((_, fileIndex) => fileIndex !== index));
   };
 
   const handleSubmit = async () => {
@@ -302,7 +311,26 @@ export default function BoxPage() {
               }}
             >
               <div>拖拽/点击添加图片(总和最大50MB)</div>
-              {totalSizeText && <div className="box-upload-info">{totalSizeText}</div>}
+              {previewUrls.length > 0 && (
+                <div className="box-upload-thumbs">
+                  {previewUrls.map((url, index) => (
+                    <div className="box-upload-thumb" key={url}>
+                      <img src={url} alt={`已选择图片${index + 1}`} />
+                      <button
+                        type="button"
+                        className="box-upload-remove"
+                        aria-label="删除图片"
+                        onClick={(event) => {
+                          event.stopPropagation();
+                          handleRemoveFile(index);
+                        }}
+                      >
+                        ×
+                      </button>
+                    </div>
+                  ))}
+                </div>
+              )}
               <input
                 ref={fileInputRef}
                 type="file"
