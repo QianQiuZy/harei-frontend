@@ -96,7 +96,7 @@ export const BackgroundSlideshow = () => {
         className="background-layer"
         style={{
           backgroundImage: `url(${images[currentIndex]})`,
-          opacity: showNext ? 0 : 1
+          opacity: 1
         }}
       />
       <div
