@@ -158,10 +158,14 @@ export default function HuangdouPage() {
             </table>
 
             <ul className="huangdou-list">
+              <li className="huangdou-list-header">
+                <span className="huangdou-list-name">用户名</span>
+                <span className="huangdou-list-count">豆力修炼值</span>
+              </li>
               {sortedItems.map((item) => (
                 <li key={`${item.uid}-${item.name}`}>
                   <span className="huangdou-list-name">{item.name}</span>
-                  <span className="huangdou-list-count">豆力修练值 {item.count}</span>
+                  <span className="huangdou-list-count">{item.count}</span>
                 </li>
               ))}
             </ul>
