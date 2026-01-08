@@ -7,7 +7,11 @@ type LiveStatus = {
   liveTime?: number | null;
 };
 
-const RANDOM_TEXTS = ['今天也要开心呀', '欢迎来到花礼的小空间', '一起期待下一次开播吧', '愿你每日好心情'];
+const RANDOM_TEXTS = [
+  "懒得喷！","妈呀","llbc", "礼礼不串","看看我的迎客松","玩网姐，唯有敬佩",
+  "155不可能再低了", "75毫米的大唧吧","花礼美乃滋","礼礼不窜",
+  "跟水蜜桃一样紧致翘弹白皙","两个大凶","鼠今色","看的几几年年的","你戴个皮筋骗我是超薄"
+];
 
 const MS_PER_DAY = 24 * 60 * 60 * 1000;
 
@@ -75,7 +79,7 @@ export default function HomePage() {
 
     const fetchStatus = async () => {
       try {
-        const response = await fetch('/live/status', { cache: 'no-store' });
+        const response = await fetch('https://api.harei.cn/live/status', { cache: 'no-store' });
         if (!response.ok) {
           throw new Error('live status failed');
         }
@@ -132,17 +136,17 @@ export default function HomePage() {
   return (
     <div className="home-page">
       <img
-        src="/images/avatar.jpg"
-        alt="花礼Harei头像"
+        src="/images/icon/avatar.jpg"
+        alt="avatar"
         className="home-avatar"
       />
       <div className="home-title">花礼Harei</div>
       <img
-        src="/images/bilibili.png"
+        src="/images/icon/bilibili.png"
         alt="bilibili"
         className="home-bilibili"
       />
-      <div className="info-box">开播状态：{liveText}</div>
+      <div className="info-box">{liveText}</div>
       <div className="countdown-wrapper" tabIndex={0}>
         <div className="info-box">纪念日倒计时</div>
         <div className="countdown-pop">
@@ -161,15 +165,15 @@ export default function HomePage() {
       </div>
       <div className="home-links">
         <a className="home-link" href="/music">
-          <img src="/images/music-l.png" alt="歌单" className="home-link-icon" />
+          <img src="/images/icon/music-l.png" alt="歌单" className="home-link-icon" />
           <span>歌单</span>
         </a>
         <a className="home-link" href="/box">
-          <img src="/images/box-l.png" alt="提问箱" className="home-link-icon" />
+          <img src="/images/icon/box-l.png" alt="提问箱" className="home-link-icon" />
           <span>提问箱</span>
         </a>
         <a className="home-link" href="/huangdou">
-          <img src="/images/huangdou.png" alt="豆力榜" className="home-link-icon" />
+          <img src="/images/icon/huangdou.png" alt="豆力榜" className="home-link-icon" />
           <span>豆力榜</span>
         </a>
       </div>

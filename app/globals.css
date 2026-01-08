@@ -39,7 +39,7 @@ a {
   background-size: cover;
   background-position: center;
   background-repeat: no-repeat;
-  transition: opacity 1s ease-in-out;
+  transition: opacity 1.3s ease-in-out;
   will-change: opacity;
 }
 
@@ -88,6 +88,11 @@ a {
   height: 6px;
   background: #111827;
   border-radius: 999px;
+  box-shadow:
+    1px 0 0 #ffffff,
+    -1px 0 0 #ffffff,
+    0 1px 0 #ffffff,
+    0 -1px 0 #ffffff;
 }
 
 .sidebar {
@@ -299,7 +304,7 @@ a {
   flex-direction: column;
   align-items: center;
   text-align: center;
-  gap: 24px;
+  gap: 12px;
   color: #f8fafc;
 }
 
@@ -317,12 +322,18 @@ a {
 }
 
 .home-title {
-  font-size: 48px;
+  font-size: 60px;
   font-weight: 600;
+  color: #111827;
+  text-shadow:
+    1px 0 0 #9ca3af,
+    -1px 0 0 #9ca3af,
+    0 1px 0 #9ca3af,
+    0 -1px 0 #9ca3af;
 }
 
 .home-bilibili {
-  width: 180px;
+  width: 80px;
   height: auto;
   transition: transform 0.3s ease;
 }
@@ -332,12 +343,14 @@ a {
 }
 
 .info-box {
-  padding: 14px 24px;
+  font-size: 12px;
+  padding: 4px 12px;
   border-radius: 16px;
   background: rgba(255, 255, 255, 0.92);
   color: #111827;
   box-shadow: 0 10px 24px rgba(15, 23, 42, 0.16);
-  min-width: 260px;
+  min-width: 50px;
+  gap: 3px;
 }
 
 .countdown-wrapper {
@@ -358,9 +371,9 @@ a {
   background: rgba(255, 255, 255, 0.95);
   color: #111827;
   border-radius: 18px;
-  padding: 18px 22px;
+  padding: 8px 12px;
   box-shadow: 0 14px 30px rgba(15, 23, 42, 0.2);
-  min-width: 260px;
+  min-width: 280px;
   transition: transform 0.25s ease, opacity 0.25s ease;
 }
 
@@ -376,7 +389,7 @@ a {
 
 .home-links {
   display: flex;
-  gap: 32px;
+  gap: 20px;
   flex-wrap: wrap;
   justify-content: center;
 }
@@ -385,9 +398,14 @@ a {
   display: flex;
   flex-direction: column;
   align-items: center;
-  gap: 12px;
+  gap: 8px;
   font-size: 18px;
-  color: #f8fafc;
+  color: #111827;
+  text-shadow:
+    1px 0 0 #9ca3af,
+    -1px 0 0 #9ca3af,
+    0 1px 0 #9ca3af,
+    0 -1px 0 #9ca3af;
   transition: transform 0.3s ease;
 }
 
@@ -403,10 +421,17 @@ a {
 
 .home-random-text {
   font-size: 48px;
+  color: #111827;
+  text-shadow:
+    1px 0 0 #9ca3af,
+    -1px 0 0 #9ca3af,
+    0 1px 0 #9ca3af,
+    0 -1px 0 #9ca3af;
   font-weight: 500;
 }
 
 .home-beian {
+  margin-top: auto;
   font-size: 14px;
 }
 
@@ -458,7 +483,7 @@ a {
   }
 
   .home-bilibili {
-    width: 150px;
+    width: 90px;
   }
 
   .home-random-text {

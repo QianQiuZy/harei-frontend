@@ -1,5 +1,6 @@
 # Harei API 清单
 
+> 此react前端的最终host为 `https://harei.cn`
 > 所有下述api的host均为 `https://api.harei.cn`
 > 说明：除特别标注外，所有需要鉴权的接口使用 `Authorization: Bearer <token>` 请求头。
 
