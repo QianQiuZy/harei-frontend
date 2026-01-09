@@ -107,6 +107,8 @@ export default function AdminMessagePage() {
   const [viewerDragging, setViewerDragging] = useState(false);
   const dragOriginRef = useRef({ x: 0, y: 0 });
   const dragOffsetRef = useRef({ x: 0, y: 0 });
+  const dragNextOffsetRef = useRef({ x: 0, y: 0 });
+  const dragRafRef = useRef<number | null>(null);
   const viewerDragMovedRef = useRef(false);
   const viewerClickGuardRef = useRef(false);
   const [viewerOriginalSet, setViewerOriginalSet] = useState<Set<string>>(new Set());
@@ -308,6 +310,9 @@ export default function AdminMessagePage() {
   }, [thumbUrls, jpgUrls, originalUrls]);
 
   const handleSelect = (item: BoxItem) => {
+    if (viewerOpen) {
+      closeViewer();
+    }
     setSelectedId(item.id);
     setReadIds((prev) => new Set(prev).add(item.id));
   };
@@ -435,15 +440,25 @@ export default function AdminMessagePage() {
     if (Math.abs(deltaX) > 3 || Math.abs(deltaY) > 3) {
       viewerDragMovedRef.current = true;
     }
-    setViewerOffset({
+    dragNextOffsetRef.current = {
       x: dragOffsetRef.current.x + deltaX,
       y: dragOffsetRef.current.y + deltaY
-    });
+    };
+    if (dragRafRef.current === null) {
+      dragRafRef.current = window.requestAnimationFrame(() => {
+        setViewerOffset({ ...dragNextOffsetRef.current });
+        dragRafRef.current = null;
+      });
+    }
   };
 
   const handleDragEnd = () => {
     setViewerDragging(false);
     viewerClickGuardRef.current = viewerDragMovedRef.current;
+    if (dragRafRef.current !== null) {
+      window.cancelAnimationFrame(dragRafRef.current);
+      dragRafRef.current = null;
+    }
   };
 
   const handleViewerClick = () => {
@@ -558,13 +573,25 @@ export default function AdminMessagePage() {
                 >
                   &lt;
                 </button>
-                <div className="admin-message-viewer-canvas" onMouseDown={handleDragStart}>
+                <div
+                  className={`admin-message-viewer-canvas${
+                    viewerDragging ? ' is-dragging' : ''
+                  }`}
+                  onMouseDown={handleDragStart}
+                >
                   {currentDisplayUrl ? (
                     <img
                       src={currentDisplayUrl}
                       alt="留言图片"
+                      className={viewerDragging ? 'is-dragging' : undefined}
                       style={{
                         transform: `translate(${viewerOffset.x}px, ${viewerOffset.y}px) scale(${viewerScale})`
+                      }}
+                      onError={() => {
+                        if (!currentOriginalPath || viewerOriginalSet.has(currentOriginalPath)) {
+                          return;
+                        }
+                        setViewerOriginalSet((prev) => new Set(prev).add(currentOriginalPath));
                       }}
                     />
                   ) : (

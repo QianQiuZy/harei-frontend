@@ -1633,6 +1633,12 @@ a {
   align-items: center;
   justify-content: center;
   cursor: grab;
+  position: relative;
+  z-index: 1;
+}
+
+.admin-message-viewer-canvas.is-dragging {
+  cursor: grabbing;
 }
 
 .admin-message-viewer-canvas img {
@@ -1640,6 +1646,11 @@ a {
   max-height: 100%;
   object-fit: contain;
   transition: transform 0.1s ease;
+  will-change: transform;
+}
+
+.admin-message-viewer-canvas img.is-dragging {
+  transition: none;
 }
 
 .admin-message-viewer-nav {
@@ -1653,6 +1664,7 @@ a {
   height: 40px;
   font-size: 18px;
   cursor: pointer;
+  z-index: 2;
 }
 
 .admin-message-viewer-nav.is-prev {
@@ -1673,6 +1685,7 @@ a {
   background: rgba(255, 255, 255, 0.9);
   color: #0f172a;
   cursor: pointer;
+  z-index: 2;
 }
 
 @keyframes box-spin {
