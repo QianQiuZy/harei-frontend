@@ -73,12 +73,12 @@ export default function AdminPage() {
         }
 
         const [pendingResponse, approvedResponse, tagResponse, captainResponse] = await Promise.all([
-          fetch(`${API_HOST}/box/pending`, {
+          fetch(`${API_HOST}/box/approved`, {
             headers: {
               Authorization: `Bearer ${token}`
             }
           }),
-          fetch(`${API_HOST}/box/approved`, {
+          fetch(`${API_HOST}/box/pending`, {
             headers: {
               Authorization: `Bearer ${token}`
             }
