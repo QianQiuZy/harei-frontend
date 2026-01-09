@@ -1921,6 +1921,113 @@ a {
   opacity: 0.6;
 }
 
+.admin-captaingift-page {
+  align-items: flex-start;
+}
+
+.admin-captaingift-card {
+  width: 40%;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 24px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  box-shadow: 0 18px 48px rgba(15, 23, 42, 0.2);
+}
+
+.admin-captaingift-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.admin-captaingift-select-wrap {
+  width: 40%;
+  min-width: 160px;
+}
+
+.admin-captaingift-select {
+  width: 100%;
+  padding: 10px 12px;
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  background: #ffffff;
+  font-size: 14px;
+  color: #111827;
+}
+
+.admin-captaingift-status {
+  font-size: 13px;
+  color: #1d4ed8;
+}
+
+.admin-captaingift-body {
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+  align-items: center;
+  min-height: 240px;
+}
+
+.admin-captaingift-upload {
+  width: 100%;
+  display: flex;
+  flex-direction: column;
+  gap: 16px;
+}
+
+.admin-captaingift-file-row {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+  padding: 10px 12px;
+  border-radius: 12px;
+  background: #eef2ff;
+  color: #1e1b4b;
+  font-size: 14px;
+}
+
+.admin-captaingift-file-name {
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.admin-captaingift-file-remove {
+  border: none;
+  border-radius: 999px;
+  padding: 6px 12px;
+  font-size: 12px;
+  cursor: pointer;
+  background: #e2e8f0;
+  color: #1f2937;
+}
+
+.admin-captaingift-file-hint {
+  font-size: 12px;
+  color: #64748b;
+}
+
+.admin-captaingift-submit {
+  width: 100%;
+  border: none;
+  border-radius: 12px;
+  padding: 12px 16px;
+  background: #111827;
+  color: #ffffff;
+  font-size: 15px;
+  font-weight: 600;
+  cursor: pointer;
+}
+
+.admin-captaingift-submit:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
 .admin-captains-page {
   align-items: center;
 }
@@ -2058,6 +2165,10 @@ a {
   }
 
   .admin-download-card {
+    width: 100%;
+  }
+
+  .admin-captaingift-card {
     width: 100%;
   }
 
