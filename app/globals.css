@@ -1688,6 +1688,118 @@ a {
   z-index: 2;
 }
 
+.admin-tag-page {
+  align-items: flex-start;
+}
+
+.admin-tag-card {
+  width: 40%;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 24px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 18px;
+  box-shadow: 0 18px 48px rgba(15, 23, 42, 0.2);
+}
+
+.admin-tag-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.admin-tag-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.admin-tag-status {
+  font-size: 13px;
+  color: #1d4ed8;
+}
+
+.admin-tag-input-row {
+  display: flex;
+  gap: 12px;
+}
+
+.admin-tag-input {
+  flex: 1;
+  border-radius: 12px;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  padding: 10px 12px;
+  font-size: 14px;
+  background: #ffffff;
+  color: #0f172a;
+}
+
+.admin-tag-input:focus {
+  outline: none;
+  border-color: rgba(37, 99, 235, 0.6);
+  box-shadow: 0 0 0 3px rgba(191, 219, 254, 0.5);
+}
+
+.admin-tag-button {
+  border: none;
+  border-radius: 12px;
+  padding: 10px 18px;
+  font-size: 14px;
+  cursor: pointer;
+  background: #2563eb;
+  color: #ffffff;
+  transition: background 0.2s ease;
+}
+
+.admin-tag-button:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.admin-tag-list {
+  display: flex;
+  flex-direction: column;
+  gap: 12px;
+}
+
+.admin-tag-item {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  border-radius: 14px;
+  background: #f8fafc;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.08);
+}
+
+.admin-tag-name {
+  font-size: 14px;
+  color: #0f172a;
+}
+
+.admin-tag-archive {
+  border: none;
+  border-radius: 999px;
+  padding: 6px 14px;
+  font-size: 12px;
+  cursor: pointer;
+  background: #e2e8f0;
+  color: #1f2937;
+  transition: background 0.2s ease;
+}
+
+.admin-tag-archive:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.admin-tag-empty {
+  font-size: 14px;
+  color: #6b7280;
+}
+
 @keyframes box-spin {
   to {
     transform: rotate(360deg);
@@ -1697,6 +1809,10 @@ a {
 @media (max-width: 640px) {
   .admin-page {
     padding: 32px 16px 40px;
+  }
+
+  .admin-tag-card {
+    width: 100%;
   }
 
   .admin-grid {
