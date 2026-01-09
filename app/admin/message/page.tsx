@@ -56,6 +56,37 @@ const buildImageUrl = (type: 'thumb' | 'jpg' | 'original', path: string) => {
   return `${API_HOST}${endpoint}?path=${encodeURIComponent(path)}`;
 };
 
+const fetchBlobWithRetry = async (
+  url: string,
+  token: string,
+  signal: AbortSignal,
+  retries = 3
+): Promise<Blob | null> => {
+  for (let attempt = 0; attempt < retries; attempt += 1) {
+    try {
+      const response = await fetch(url, {
+        headers: {
+          Authorization: `Bearer ${token}`
+        },
+        signal
+      });
+      if (!response.ok) {
+        throw new Error('image fetch failed');
+      }
+      return await response.blob();
+    } catch (error) {
+      if (signal.aborted) {
+        return null;
+      }
+      if (attempt === retries - 1) {
+        return null;
+      }
+      await new Promise((resolve) => setTimeout(resolve, 300));
+    }
+  }
+  return null;
+};
+
 export default function AdminMessagePage() {
   const router = useRouter();
   const [token, setToken] = useState<string | null>(null);
@@ -77,6 +108,7 @@ export default function AdminMessagePage() {
   const dragOriginRef = useRef({ x: 0, y: 0 });
   const dragOffsetRef = useRef({ x: 0, y: 0 });
   const [viewerOriginal, setViewerOriginal] = useState(false);
+  const [preferOriginal, setPreferOriginal] = useState(false);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -139,9 +171,10 @@ export default function AdminMessagePage() {
         if (data.code !== 0) {
           throw new Error('fetch failed');
         }
-        setItems(data.items ?? []);
-        if (data.items?.length) {
-          setSelectedId((current) => current ?? data.items[0].id);
+        const sortedItems = [...(data.items ?? [])].sort((a, b) => a.id - b.id);
+        setItems(sortedItems);
+        if (sortedItems.length) {
+          setSelectedId((current) => current ?? sortedItems[0].id);
         }
       } catch (error) {
         setItems([]);
@@ -167,21 +200,15 @@ export default function AdminMessagePage() {
           if (thumbUrls[path]) {
             continue;
           }
-          try {
-            const response = await fetch(buildImageUrl('thumb', path), {
-              headers: {
-                Authorization: `Bearer ${token}`
-              },
-              signal: controller.signal
-            });
-            if (!response.ok) {
-              continue;
-            }
-            const blob = await response.blob();
-            newUrls[path] = URL.createObjectURL(blob);
-          } catch (error) {
+          const blob = await fetchBlobWithRetry(
+            buildImageUrl('thumb', path),
+            token,
+            controller.signal
+          );
+          if (!blob) {
             continue;
           }
+          newUrls[path] = URL.createObjectURL(blob);
         }
       }
 
@@ -215,21 +242,15 @@ export default function AdminMessagePage() {
         if (jpgUrls[path]) {
           continue;
         }
-        try {
-          const response = await fetch(buildImageUrl('jpg', path), {
-            headers: {
-              Authorization: `Bearer ${token}`
-            },
-            signal: controller.signal
-          });
-          if (!response.ok) {
-            continue;
-          }
-          const blob = await response.blob();
-          newUrls[path] = URL.createObjectURL(blob);
-        } catch (error) {
+        const blob = await fetchBlobWithRetry(
+          buildImageUrl('jpg', path),
+          token,
+          controller.signal
+        );
+        if (!blob) {
           continue;
         }
+        newUrls[path] = URL.createObjectURL(blob);
       }
 
       if (Object.keys(newUrls).length > 0) {
@@ -256,24 +277,18 @@ export default function AdminMessagePage() {
     }
 
     const loadOriginal = async () => {
-      try {
-        const response = await fetch(buildImageUrl('original', path), {
-          headers: {
-            Authorization: `Bearer ${token}`
-          },
-          signal: controller.signal
-        });
-        if (!response.ok) {
-          return;
-        }
-        const blob = await response.blob();
-        setOriginalUrls((prev) => ({
-          ...prev,
-          [path]: URL.createObjectURL(blob)
-        }));
-      } catch (error) {
+      const blob = await fetchBlobWithRetry(
+        buildImageUrl('original', path),
+        token,
+        controller.signal
+      );
+      if (!blob) {
         return;
       }
+      setOriginalUrls((prev) => ({
+        ...prev,
+        [path]: URL.createObjectURL(blob)
+      }));
     };
 
     loadOriginal();
@@ -361,7 +376,7 @@ export default function AdminMessagePage() {
 
   const openViewer = (index: number) => {
     setViewerIndex(index);
-    setViewerOriginal(false);
+    setViewerOriginal(preferOriginal);
     setViewerScale(1);
     setViewerOffset({ x: 0, y: 0 });
     setViewerOpen(true);
@@ -369,7 +384,6 @@ export default function AdminMessagePage() {
 
   const closeViewer = () => {
     setViewerOpen(false);
-    setViewerOriginal(false);
     setViewerScale(1);
     setViewerOffset({ x: 0, y: 0 });
   };
@@ -380,7 +394,6 @@ export default function AdminMessagePage() {
       return;
     }
     setViewerIndex((prev) => (prev - 1 + currentImages.length) % currentImages.length);
-    setViewerOriginal(false);
     setViewerScale(1);
     setViewerOffset({ x: 0, y: 0 });
   };
@@ -391,7 +404,6 @@ export default function AdminMessagePage() {
       return;
     }
     setViewerIndex((prev) => (prev + 1) % currentImages.length);
-    setViewerOriginal(false);
     setViewerScale(1);
     setViewerOffset({ x: 0, y: 0 });
   };
@@ -435,6 +447,7 @@ export default function AdminMessagePage() {
   const headerText = selectedItem
     ? `${selectedItem.id}-${formatDateTime(selectedItem.created_at)}`
     : '暂无留言';
+  const sortedItems = useMemo(() => [...items].sort((a, b) => a.id - b.id), [items]);
 
   return (
     <section className="admin-page admin-message-page">
@@ -453,7 +466,7 @@ export default function AdminMessagePage() {
             ) : items.length === 0 ? (
               <div className="admin-message-empty">暂无留言</div>
             ) : (
-              items.map((item) => {
+              sortedItems.map((item) => {
                 const label = `${item.id}-${formatDateTime(item.created_at)}`;
                 const isSelected = item.id === selectedId;
                 const isRead = readIds.has(item.id);
@@ -480,28 +493,28 @@ export default function AdminMessagePage() {
               ) : (
                 <div className="admin-message-content">请选择左侧留言</div>
               )}
-              {selectedItem && hasImages ? (
-                <div className="admin-message-images">
-                  <div className="admin-message-divider" />
-                  <div className="admin-message-thumbs">
-                    {currentThumbs.map((path, index) => (
-                      <button
-                        key={path}
-                        type="button"
-                        className="admin-message-thumb"
-                        onClick={() => openViewer(index)}
-                      >
-                        {thumbUrls[path] ? (
-                          <img src={thumbUrls[path]} alt={`缩略图${index + 1}`} />
-                        ) : (
-                          <span>加载中...</span>
-                        )}
-                      </button>
-                    ))}
-                  </div>
-                </div>
-              ) : null}
             </div>
+            {selectedItem && hasImages ? (
+              <div className="admin-message-images-panel">
+                <div className="admin-message-divider" />
+                <div className="admin-message-thumbs">
+                  {currentThumbs.map((path, index) => (
+                    <button
+                      key={path}
+                      type="button"
+                      className="admin-message-thumb"
+                      onClick={() => openViewer(index)}
+                    >
+                      {thumbUrls[path] ? (
+                        <img src={thumbUrls[path]} alt={`缩略图${index + 1}`} />
+                      ) : (
+                        <span>加载中...</span>
+                      )}
+                    </button>
+                  ))}
+                </div>
+              </div>
+            ) : null}
             <div className="admin-message-actions">
               <button type="button" className="admin-message-button is-ghost" onClick={handleArchive}>
                 一键归档
@@ -546,16 +559,19 @@ export default function AdminMessagePage() {
                 >
                   &gt;
                 </button>
-                <button
-                  type="button"
-                  className="admin-message-viewer-original"
-                  onClick={(event) => {
-                    event.stopPropagation();
-                    setViewerOriginal(true);
-                  }}
-                >
-                  显示原图
-                </button>
+                {!viewerOriginal ? (
+                  <button
+                    type="button"
+                    className="admin-message-viewer-original"
+                    onClick={(event) => {
+                      event.stopPropagation();
+                      setViewerOriginal(true);
+                      setPreferOriginal(true);
+                    }}
+                  >
+                    显示原图
+                  </button>
+                ) : null}
               </div>
             ) : null}
           </div>

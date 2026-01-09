@@ -1427,7 +1427,8 @@ a {
   flex-direction: column;
   gap: 20px;
   box-shadow: 0 18px 48px rgba(15, 23, 42, 0.2);
-  min-height: 600px;
+  height: 80vh;
+  min-height: 640px;
 }
 
 .admin-message-header {
@@ -1463,6 +1464,7 @@ a {
   gap: 20px;
   flex: 1;
   min-height: 0;
+  overflow: hidden;
 }
 
 .admin-message-list {
@@ -1474,6 +1476,7 @@ a {
   gap: 10px;
   overflow-y: auto;
   min-height: 0;
+  max-height: 100%;
 }
 
 .admin-message-item {
@@ -1506,6 +1509,7 @@ a {
   flex-direction: column;
   min-height: 0;
   position: relative;
+  overflow: hidden;
 }
 
 .admin-message-detail-scroll {
@@ -1534,16 +1538,16 @@ a {
   margin: 18px 0;
 }
 
-.admin-message-images {
-  display: flex;
-  flex-direction: column;
-  gap: 12px;
+.admin-message-images-panel {
+  flex: 0 0 auto;
+  padding-top: 12px;
 }
 
 .admin-message-thumbs {
   display: grid;
   grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
   gap: 12px;
+  align-items: stretch;
 }
 
 .admin-message-thumb {
@@ -1553,6 +1557,10 @@ a {
   padding: 6px;
   cursor: pointer;
   box-shadow: 0 8px 18px rgba(15, 23, 42, 0.12);
+  aspect-ratio: 4 / 3;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .admin-message-thumb img {
