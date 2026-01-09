@@ -103,7 +103,7 @@ export default function HomePage() {
   }, []);
 
   const nowUtc8DayStart = getUtc8DayStart(now);
-  const debutStart = Date.UTC(2024, 6, 16);
+  const debutStart = Date.UTC(2024, 6, 15);
   const debutDays = Math.max(0, Math.floor((nowUtc8DayStart - debutStart) / MS_PER_DAY));
 
   const utc8Date = getUtc8Date(now);
