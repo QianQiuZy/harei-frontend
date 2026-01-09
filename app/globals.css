@@ -1545,10 +1545,15 @@ a {
 }
 
 .admin-message-thumbs {
-  display: grid;
-  grid-template-columns: repeat(auto-fill, minmax(120px, 1fr));
+  display: flex;
   gap: 12px;
-  align-items: stretch;
+  overflow-x: auto;
+  overflow-y: hidden;
+  padding-bottom: 8px;
+  scrollbar-gutter: stable;
+  -webkit-overflow-scrolling: touch;
+  align-items: center;
+  flex-wrap: nowrap;
 }
 
 .admin-message-thumb {
@@ -1562,6 +1567,8 @@ a {
   display: flex;
   align-items: center;
   justify-content: center;
+  flex: 0 0 auto;
+  width: 60px;
 }
 
 .admin-message-thumb img {

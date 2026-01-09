@@ -107,6 +107,8 @@ export default function AdminMessagePage() {
   const [viewerDragging, setViewerDragging] = useState(false);
   const dragOriginRef = useRef({ x: 0, y: 0 });
   const dragOffsetRef = useRef({ x: 0, y: 0 });
+  const viewerDragMovedRef = useRef(false);
+  const viewerClickGuardRef = useRef(false);
   const [viewerOriginal, setViewerOriginal] = useState(false);
   const [preferOriginal, setPreferOriginal] = useState(false);
 
@@ -379,6 +381,8 @@ export default function AdminMessagePage() {
     setViewerOriginal(preferOriginal);
     setViewerScale(1);
     setViewerOffset({ x: 0, y: 0 });
+    viewerDragMovedRef.current = false;
+    viewerClickGuardRef.current = false;
     setViewerOpen(true);
   };
 
@@ -386,6 +390,8 @@ export default function AdminMessagePage() {
     setViewerOpen(false);
     setViewerScale(1);
     setViewerOffset({ x: 0, y: 0 });
+    viewerDragMovedRef.current = false;
+    viewerClickGuardRef.current = false;
   };
 
   const handlePrev = (event?: React.MouseEvent<HTMLButtonElement>) => {
@@ -419,6 +425,7 @@ export default function AdminMessagePage() {
     setViewerDragging(true);
     dragOriginRef.current = { x: event.clientX, y: event.clientY };
     dragOffsetRef.current = { ...viewerOffset };
+    viewerDragMovedRef.current = false;
   };
 
   const handleDragMove = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -427,6 +434,9 @@ export default function AdminMessagePage() {
     }
     const deltaX = event.clientX - dragOriginRef.current.x;
     const deltaY = event.clientY - dragOriginRef.current.y;
+    if (Math.abs(deltaX) > 3 || Math.abs(deltaY) > 3) {
+      viewerDragMovedRef.current = true;
+    }
     setViewerOffset({
       x: dragOffsetRef.current.x + deltaX,
       y: dragOffsetRef.current.y + deltaY
@@ -435,6 +445,16 @@ export default function AdminMessagePage() {
 
   const handleDragEnd = () => {
     setViewerDragging(false);
+    viewerClickGuardRef.current = viewerDragMovedRef.current;
+  };
+
+  const handleViewerClick = () => {
+    if (viewerDragging || viewerClickGuardRef.current || viewerDragMovedRef.current) {
+      viewerClickGuardRef.current = false;
+      viewerDragMovedRef.current = false;
+      return;
+    }
+    closeViewer();
   };
 
   const currentDisplayPath = viewerOriginal
@@ -526,7 +546,7 @@ export default function AdminMessagePage() {
             {viewerOpen && selectedItem ? (
               <div
                 className="admin-message-viewer"
-                onClick={closeViewer}
+                onClick={handleViewerClick}
                 onWheel={handleWheel}
                 onMouseMove={handleDragMove}
                 onMouseUp={handleDragEnd}
