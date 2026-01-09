@@ -1,8 +1,7 @@
 import './globals.css';
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';
-import { BackgroundSlideshow } from '@/components/background/BackgroundSlideshow';
-import { Sidebar } from '@/components/Sidebar';
+import { AppShell } from '@/components/AppShell';
 
 export const metadata: Metadata = {
   title: '花礼harei的小空间',
@@ -19,11 +18,7 @@ export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="zh-CN">
       <body>
-        <BackgroundSlideshow />
-        <div className="app-shell">
-          <Sidebar />
-          <main className="app-main">{children}</main>
-        </div>
+        <AppShell>{children}</AppShell>
       </body>
     </html>
   );
