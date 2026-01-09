@@ -109,8 +109,7 @@ export default function AdminMessagePage() {
   const dragOffsetRef = useRef({ x: 0, y: 0 });
   const viewerDragMovedRef = useRef(false);
   const viewerClickGuardRef = useRef(false);
-  const [viewerOriginal, setViewerOriginal] = useState(false);
-  const [preferOriginal, setPreferOriginal] = useState(false);
+  const [viewerOriginalSet, setViewerOriginalSet] = useState<Set<string>>(new Set());
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -268,13 +267,13 @@ export default function AdminMessagePage() {
   }, [jpgUrls, selectedItem, token]);
 
   useEffect(() => {
-    if (!token || !viewerOpen || !viewerOriginal || !selectedItem) {
+    if (!token || !viewerOpen || !selectedItem) {
       return;
     }
 
     const controller = new AbortController();
     const path = selectedItem.images?.[viewerIndex];
-    if (!path || originalUrls[path]) {
+    if (!path || !viewerOriginalSet.has(path) || originalUrls[path]) {
       return;
     }
 
@@ -298,7 +297,7 @@ export default function AdminMessagePage() {
     return () => {
       controller.abort();
     };
-  }, [originalUrls, selectedItem, token, viewerIndex, viewerOpen, viewerOriginal]);
+  }, [originalUrls, selectedItem, token, viewerIndex, viewerOpen, viewerOriginalSet]);
 
   useEffect(() => {
     return () => {
@@ -378,7 +377,6 @@ export default function AdminMessagePage() {
 
   const openViewer = (index: number) => {
     setViewerIndex(index);
-    setViewerOriginal(preferOriginal);
     setViewerScale(1);
     setViewerOffset({ x: 0, y: 0 });
     viewerDragMovedRef.current = false;
@@ -457,10 +455,11 @@ export default function AdminMessagePage() {
     closeViewer();
   };
 
-  const currentDisplayPath = viewerOriginal
-    ? currentOriginals[viewerIndex]
+  const currentOriginalPath = currentOriginals[viewerIndex];
+  const currentDisplayPath = viewerOriginalSet.has(currentOriginalPath)
+    ? currentOriginalPath
     : currentImages[viewerIndex];
-  const currentDisplayUrl = viewerOriginal
+  const currentDisplayUrl = viewerOriginalSet.has(currentOriginalPath)
     ? (currentDisplayPath ? originalUrls[currentDisplayPath] : undefined)
     : (currentDisplayPath ? jpgUrls[currentDisplayPath] : undefined);
 
@@ -579,14 +578,16 @@ export default function AdminMessagePage() {
                 >
                   &gt;
                 </button>
-                {!viewerOriginal ? (
+                {!viewerOriginalSet.has(currentOriginalPath) ? (
                   <button
                     type="button"
                     className="admin-message-viewer-original"
                     onClick={(event) => {
                       event.stopPropagation();
-                      setViewerOriginal(true);
-                      setPreferOriginal(true);
+                      if (!currentOriginalPath) {
+                        return;
+                      }
+                      setViewerOriginalSet((prev) => new Set(prev).add(currentOriginalPath));
                     }}
                   >
                     显示原图
