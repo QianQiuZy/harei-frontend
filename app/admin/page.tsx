@@ -147,6 +147,10 @@ export default function AdminPage() {
             <div className="admin-panel-title">tag管理</div>
             <div className="admin-panel-subtitle">{tagText}</div>
           </Link>
+          <Link className="admin-panel-card" href="/admin/dowload">
+            <div className="admin-panel-title">下载资源</div>
+            <div className="admin-panel-subtitle">上传下载资源</div>
+          </Link>
           <Link className="admin-panel-card" href="/admin/captains">
             <div className="admin-panel-title">舰长列表</div>
             <div className="admin-panel-subtitle">{captainText}</div>
