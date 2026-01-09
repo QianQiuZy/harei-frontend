@@ -371,7 +371,7 @@ export default function AdminMessagePage() {
       }
       setStatusMessage(data.message);
     } catch (error) {
-      setStatusMessage('归档失败，请稍后重试');
+      setStatusMessage('过审失败，请稍后重试');
     }
   };
 
@@ -489,7 +489,7 @@ export default function AdminMessagePage() {
         <header className="admin-message-header">
           <div>
             <h1 className="admin-message-title">留言箱</h1>
-            <p className="admin-message-subtitle">已审核留言列表</p>
+            <p className="admin-message-subtitle">待审核留言列表</p>
           </div>
           {statusMessage ? <span className="admin-message-status">{statusMessage}</span> : null}
         </header>
