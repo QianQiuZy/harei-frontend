@@ -31,8 +31,24 @@ const getIsMobile = () => {
   return width <= 768 || ratio < 1;
 };
 
+const STORAGE_PREFIX = 'harei:bg-slideshow';
+
+const getStorageKey = (area: string, imageKey: string) => `${STORAGE_PREFIX}:${area}:${imageKey}`;
+
+const readStoredIndex = (area: string, imageKey: string, length: number) => {
+  if (typeof window === 'undefined') {
+    return 0;
+  }
+  const stored = window.localStorage.getItem(getStorageKey(area, imageKey));
+  const parsed = Number(stored);
+  if (!stored || Number.isNaN(parsed) || length <= 0) {
+    return 0;
+  }
+  return ((parsed % length) + length) % length;
+};
+
 export const BackgroundSlideshow = () => {
-  const { enabled } = useBackgroundAnimation();
+  const { enabled, area } = useBackgroundAnimation();
   const [isMobile, setIsMobile] = useState(getIsMobile);
   const [currentIndex, setCurrentIndex] = useState(0);
   const [nextIndex, setNextIndex] = useState(1);
@@ -56,10 +72,19 @@ export const BackgroundSlideshow = () => {
   }, [currentIndex]);
 
   useEffect(() => {
-    setCurrentIndex(0);
-    setNextIndex(images.length > 1 ? 1 : 0);
+    const storedIndex = readStoredIndex(area, imageKey, images.length);
+    setCurrentIndex(storedIndex);
+    setNextIndex(images.length > 1 ? (storedIndex + 1) % images.length : storedIndex);
+    currentRef.current = storedIndex;
     setIsFading(false);
-  }, [imageKey, images.length]);
+  }, [area, imageKey, images.length]);
+
+  useEffect(() => {
+    if (typeof window === 'undefined') {
+      return;
+    }
+    window.localStorage.setItem(getStorageKey(area, imageKey), String(currentIndex));
+  }, [area, imageKey, currentIndex]);
 
   useEffect(() => {
     if (!enabled || images.length < 2) {
