@@ -1921,6 +1921,127 @@ a {
   opacity: 0.6;
 }
 
+.admin-captains-page {
+  align-items: center;
+}
+
+.admin-captains-card {
+  width: 60%;
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 24px;
+  padding: 24px;
+  display: flex;
+  flex-direction: column;
+  gap: 20px;
+  box-shadow: 0 18px 48px rgba(15, 23, 42, 0.2);
+}
+
+.admin-captains-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.admin-captains-title {
+  margin: 0;
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.admin-captains-subtitle {
+  margin: 6px 0 0;
+  font-size: 14px;
+  color: #6b7280;
+}
+
+.admin-captains-status {
+  font-size: 13px;
+  color: #1d4ed8;
+}
+
+.admin-captains-toolbar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+}
+
+.admin-captains-month {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  font-size: 14px;
+  color: #0f172a;
+}
+
+.admin-captains-month select {
+  border-radius: 10px;
+  border: 1px solid rgba(148, 163, 184, 0.4);
+  padding: 6px 10px;
+  font-size: 14px;
+  background: #ffffff;
+  color: #0f172a;
+}
+
+.admin-captains-month select:focus {
+  outline: none;
+  border-color: rgba(37, 99, 235, 0.6);
+  box-shadow: 0 0 0 3px rgba(191, 219, 254, 0.5);
+}
+
+.admin-captains-download {
+  border: none;
+  border-radius: 999px;
+  padding: 10px 18px;
+  font-size: 14px;
+  cursor: pointer;
+  background: #111827;
+  color: #ffffff;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+  box-shadow: 0 8px 18px rgba(15, 23, 42, 0.18);
+}
+
+.admin-captains-download:hover {
+  transform: translateY(-1px);
+}
+
+.admin-captains-download:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+}
+
+.admin-captains-table-wrapper {
+  overflow-x: auto;
+}
+
+.admin-captains-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: 14px;
+}
+
+.admin-captains-table thead {
+  background: #f1f5f9;
+}
+
+.admin-captains-table th,
+.admin-captains-table td {
+  padding: 12px 10px;
+  text-align: left;
+  border-bottom: 1px solid #e2e8f0;
+}
+
+.admin-captains-table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.admin-captains-empty {
+  text-align: center;
+  color: #6b7280;
+  padding: 24px 0;
+}
+
 @keyframes box-spin {
   to {
     transform: rotate(360deg);
@@ -1937,6 +2058,10 @@ a {
   }
 
   .admin-download-card {
+    width: 100%;
+  }
+
+  .admin-captains-card {
     width: 100%;
   }
 
