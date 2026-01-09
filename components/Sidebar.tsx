@@ -1,6 +1,7 @@
 'use client';
 
 import { useMemo, useState } from 'react';
+import { usePathname } from 'next/navigation';
 import { useBackgroundAnimation } from '@/components/background/useBackgroundAnimation';
 
 type NavItem = {
@@ -10,7 +11,7 @@ type NavItem = {
   external?: boolean;
 };
 
-const NAV_ITEMS: NavItem[] = [
+const FRONT_NAV_ITEMS: NavItem[] = [
   { label: '首页', href: '/', icon: '/images/icon/home.png' },
   { label: '歌单', href: '/music', icon: '/images/icon/music.png' },
   { label: '提问箱', href: '/box', icon: '/images/icon/box.png' },
@@ -44,10 +45,25 @@ const NAV_ITEMS: NavItem[] = [
   { label: '关于本站', href: '/about', icon: '/images/icon/zuozhe.png' }
 ];
 
+const ADMIN_NAV_ITEMS: NavItem[] = [
+  { label: '首页', href: '/', icon: '/images/icon/home.png' },
+  { label: '管理首页', href: '/admin', icon: '/images/icon/space.png' },
+  { label: '留言箱', href: '/admin/message', icon: '/images/icon/box.png' },
+  { label: '审核界面', href: '/admin/audit', icon: '/images/icon/lubo.png' },
+  { label: '下载资源管理', href: '/admin/download', icon: '/images/icon/download.png' },
+  { label: '留言箱tag管理', href: '/admin/tag', icon: '/images/icon/stream.png' },
+  { label: '舰长列表', href: '/admin/captains', icon: '/images/icon/moegirl.png' },
+  { label: '舰礼留档', href: '/admin/captaingift', icon: '/images/icon/captaingift.png' }
+];
+
 export const Sidebar = () => {
+  const pathname = usePathname();
   const { enabled, toggle } = useBackgroundAnimation();
   const [open, setOpen] = useState(false);
-  const items = useMemo(() => NAV_ITEMS, []);
+  const items = useMemo(
+    () => (pathname.startsWith('/admin') ? ADMIN_NAV_ITEMS : FRONT_NAV_ITEMS),
+    [pathname]
+  );
 
   const handleToggle = () => {
     setOpen((prev) => !prev);
