@@ -1693,6 +1693,7 @@ a {
 }
 
 .admin-tag-card {
+  margin-top: -48px;
   width: 40%;
   background: rgba(255, 255, 255, 0.95);
   border-radius: 24px;
@@ -1805,6 +1806,7 @@ a {
 }
 
 .admin-download-card {
+  margin-top: -48px;
   width: 40%;
   background: rgba(255, 255, 255, 0.95);
   border-radius: 24px;
@@ -1926,6 +1928,7 @@ a {
 }
 
 .admin-captaingift-card {
+  margin-top: -48px;
   width: 40%;
   background: rgba(255, 255, 255, 0.95);
   border-radius: 24px;
@@ -2033,6 +2036,7 @@ a {
 }
 
 .admin-captains-card {
+  margin-top: -48px;
   width: 60%;
   background: rgba(255, 255, 255, 0.95);
   border-radius: 24px;
