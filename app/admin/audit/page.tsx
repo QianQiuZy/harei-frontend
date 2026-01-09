@@ -46,46 +46,10 @@ const formatDateTime = (value: string) => {
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 };
 
-const buildImageUrl = (type: 'thumb' | 'jpg' | 'original', path: string) => {
-  const endpoint =
-    type === 'thumb'
-      ? '/box/image/thumb'
-      : type === 'jpg'
-        ? '/box/image/jpg'
-        : '/box/image/original';
-  return `${API_HOST}${endpoint}?path=${encodeURIComponent(path)}`;
-};
-
-const fetchBlobWithRetry = async (
-  url: string,
-  token: string,
-  signal: AbortSignal,
-  retries = 3
-): Promise<Blob | null> => {
-  for (let attempt = 0; attempt < retries; attempt += 1) {
-    try {
-      const response = await fetch(url, {
-        headers: {
-          Authorization: `Bearer ${token}`
-        },
-        signal
-      });
-      if (!response.ok) {
-        throw new Error('image fetch failed');
-      }
-      return await response.blob();
-    } catch (error) {
-      if (signal.aborted) {
-        return null;
-      }
-      if (attempt === retries - 1) {
-        return null;
-      }
-      await new Promise((resolve) => setTimeout(resolve, 300));
-    }
-  }
-  return null;
-};
+const buildImageUrl = (type: 'thumb' | 'jpg' | 'original', path: string, token: string) =>
+  `/api/admin-image?type=${type}&path=${encodeURIComponent(path)}&token=${encodeURIComponent(
+    token
+  )}`;
 
 export default function AdminMessagePage() {
   const router = useRouter();
@@ -95,10 +59,6 @@ export default function AdminMessagePage() {
   const [readIds, setReadIds] = useState<Set<number>>(new Set());
   const [statusMessage, setStatusMessage] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(true);
-
-  const [thumbUrls, setThumbUrls] = useState<Record<string, string>>({});
-  const [jpgUrls, setJpgUrls] = useState<Record<string, string>>({});
-  const [originalUrls, setOriginalUrls] = useState<Record<string, string>>({});
 
   const [viewerOpen, setViewerOpen] = useState(false);
   const [viewerIndex, setViewerIndex] = useState(0);
@@ -190,125 +150,10 @@ export default function AdminMessagePage() {
     fetchItems();
   }, [token]);
 
-  useEffect(() => {
-    if (!token || items.length === 0) {
-      return;
-    }
-
-    const controller = new AbortController();
-
-    const loadThumbs = async () => {
-      const newUrls: Record<string, string> = {};
-      for (const item of items) {
-        for (const path of item.images_thumb ?? []) {
-          if (thumbUrls[path]) {
-            continue;
-          }
-          const blob = await fetchBlobWithRetry(
-            buildImageUrl('thumb', path),
-            token,
-            controller.signal
-          );
-          if (!blob) {
-            continue;
-          }
-          newUrls[path] = URL.createObjectURL(blob);
-        }
-      }
-
-      if (Object.keys(newUrls).length > 0) {
-        setThumbUrls((prev) => ({ ...prev, ...newUrls }));
-      }
-    };
-
-    loadThumbs();
-
-    return () => {
-      controller.abort();
-    };
-  }, [items, token, thumbUrls]);
-
   const selectedItem = useMemo(
     () => items.find((item) => item.id === selectedId) ?? null,
     [items, selectedId]
   );
-
-  useEffect(() => {
-    if (!token || !selectedItem) {
-      return;
-    }
-
-    const controller = new AbortController();
-
-    const loadJpgs = async () => {
-      const newUrls: Record<string, string> = {};
-      for (const path of selectedItem.images_jpg ?? []) {
-        if (jpgUrls[path]) {
-          continue;
-        }
-        const blob = await fetchBlobWithRetry(
-          buildImageUrl('jpg', path),
-          token,
-          controller.signal
-        );
-        if (!blob) {
-          continue;
-        }
-        newUrls[path] = URL.createObjectURL(blob);
-      }
-
-      if (Object.keys(newUrls).length > 0) {
-        setJpgUrls((prev) => ({ ...prev, ...newUrls }));
-      }
-    };
-
-    loadJpgs();
-
-    return () => {
-      controller.abort();
-    };
-  }, [jpgUrls, selectedItem, token]);
-
-  useEffect(() => {
-    if (!token || !viewerOpen || !selectedItem) {
-      return;
-    }
-
-    const controller = new AbortController();
-    const path = selectedItem.images?.[viewerIndex];
-    if (!path || !viewerOriginalSet.has(path) || originalUrls[path]) {
-      return;
-    }
-
-    const loadOriginal = async () => {
-      const blob = await fetchBlobWithRetry(
-        buildImageUrl('original', path),
-        token,
-        controller.signal
-      );
-      if (!blob) {
-        return;
-      }
-      setOriginalUrls((prev) => ({
-        ...prev,
-        [path]: URL.createObjectURL(blob)
-      }));
-    };
-
-    loadOriginal();
-
-    return () => {
-      controller.abort();
-    };
-  }, [originalUrls, selectedItem, token, viewerIndex, viewerOpen, viewerOriginalSet]);
-
-  useEffect(() => {
-    return () => {
-      Object.values(thumbUrls).forEach((url) => URL.revokeObjectURL(url));
-      Object.values(jpgUrls).forEach((url) => URL.revokeObjectURL(url));
-      Object.values(originalUrls).forEach((url) => URL.revokeObjectURL(url));
-    };
-  }, [thumbUrls, jpgUrls, originalUrls]);
 
   useEffect(() => {
     if (selectedId === null) {
@@ -491,9 +336,14 @@ export default function AdminMessagePage() {
   const currentDisplayPath = viewerOriginalSet.has(currentOriginalPath)
     ? currentOriginalPath
     : currentImages[viewerIndex];
-  const currentDisplayUrl = viewerOriginalSet.has(currentOriginalPath)
-    ? (currentDisplayPath ? originalUrls[currentDisplayPath] : undefined)
-    : (currentDisplayPath ? jpgUrls[currentDisplayPath] : undefined);
+  const currentDisplayUrl =
+    currentDisplayPath && token
+      ? buildImageUrl(
+          viewerOriginalSet.has(currentOriginalPath) ? 'original' : 'jpg',
+          currentDisplayPath,
+          token
+        )
+      : undefined;
 
   const headerText = selectedItem
     ? `${selectedItem.id}-${formatDateTime(selectedItem.created_at)}`
@@ -556,8 +406,8 @@ export default function AdminMessagePage() {
                       className="admin-message-thumb"
                       onClick={() => openViewer(index)}
                     >
-                      {thumbUrls[path] ? (
-                        <img src={thumbUrls[path]} alt={`缩略图${index + 1}`} />
+                      {token ? (
+                        <img src={buildImageUrl('thumb', path, token)} alt={`缩略图${index + 1}`} />
                       ) : (
                         <span>加载中...</span>
                       )}
