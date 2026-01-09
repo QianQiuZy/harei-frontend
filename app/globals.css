@@ -1429,7 +1429,7 @@ a {
   gap: 20px;
   box-shadow: 0 18px 48px rgba(15, 23, 42, 0.2);
   height: 80vh;
-  min-height: 800px;
+  min-height: 740px;
 }
 
 .admin-message-header {
