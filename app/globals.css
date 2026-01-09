@@ -1351,19 +1351,45 @@ a {
   justify-content: center;
   min-height: calc(100vh - 152px);
   margin-top: -48px;
+  padding: 40px 24px 56px;
 }
 
-.admin-card {
-  width: 40%;
-  max-width: 720px;
-  background: rgba(255, 255, 255, 0.9);
-  border-radius: 20px;
-  padding: 28px;
-  color: #111827;
-  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.18);
+.admin-dashboard {
+  width: min(960px, 100%);
   display: flex;
   flex-direction: column;
-  gap: 12px;
+  gap: 24px;
+}
+
+.admin-header {
+  background: rgba(255, 255, 255, 0.9);
+  border-radius: 20px;
+  padding: 24px 28px;
+  box-shadow: 0 16px 40px rgba(15, 23, 42, 0.18);
+}
+
+.admin-grid {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 24px;
+}
+
+.admin-panel-card {
+  background: rgba(255, 255, 255, 0.95);
+  border-radius: 20px;
+  padding: 24px;
+  color: #111827;
+  box-shadow: 0 16px 36px rgba(15, 23, 42, 0.16);
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+  text-decoration: none;
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+
+.admin-panel-card:hover {
+  transform: translateY(-4px);
+  box-shadow: 0 20px 48px rgba(15, 23, 42, 0.2);
 }
 
 .admin-title {
@@ -1378,6 +1404,16 @@ a {
   color: #4b5563;
 }
 
+.admin-panel-title {
+  font-size: 20px;
+  font-weight: 600;
+}
+
+.admin-panel-subtitle {
+  font-size: 14px;
+  color: #6b7280;
+}
+
 @keyframes box-spin {
   to {
     transform: rotate(360deg);
@@ -1385,6 +1421,18 @@ a {
 }
 
 @media (max-width: 640px) {
+  .admin-page {
+    padding: 32px 16px 40px;
+  }
+
+  .admin-grid {
+    grid-template-columns: 1fr;
+  }
+
+  .admin-panel-card {
+    padding: 20px;
+  }
+
   .sidebar {
     width: min(200px, 70vw);
     padding: 16px 14px;
