@@ -112,6 +112,7 @@ export default function AdminMessagePage() {
   const viewerDragMovedRef = useRef(false);
   const viewerClickGuardRef = useRef(false);
   const [viewerOriginalSet, setViewerOriginalSet] = useState<Set<string>>(new Set());
+  const previousSelectedRef = useRef<number | null>(null);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -309,12 +310,28 @@ export default function AdminMessagePage() {
     };
   }, [thumbUrls, jpgUrls, originalUrls]);
 
+  useEffect(() => {
+    if (selectedId === null) {
+      previousSelectedRef.current = null;
+      return;
+    }
+
+    const previousId = previousSelectedRef.current;
+    if (previousId !== null && previousId !== selectedId) {
+      setReadIds((prev) => {
+        const next = new Set(prev);
+        next.add(previousId);
+        return next;
+      });
+    }
+    previousSelectedRef.current = selectedId;
+  }, [selectedId]);
+
   const handleSelect = (item: BoxItem) => {
     if (viewerOpen) {
       closeViewer();
     }
     setSelectedId(item.id);
-    setReadIds((prev) => new Set(prev).add(item.id));
   };
 
   const handleDelete = async () => {
