@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 
 type BoxItem = {
@@ -73,6 +73,9 @@ export default function AdminMessagePage() {
   const viewerClickGuardRef = useRef(false);
   const [viewerOriginalSet, setViewerOriginalSet] = useState<Set<string>>(new Set());
   const previousSelectedRef = useRef<number | null>(null);
+  const imageCacheRef = useRef<Map<string, string>>(new Map());
+  const imageLoadingRef = useRef<Set<string>>(new Set());
+  const [, setCacheVersion] = useState(0);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -112,6 +115,14 @@ export default function AdminMessagePage() {
 
     checkAuth();
   }, [router]);
+
+  useEffect(() => {
+    return () => {
+      imageCacheRef.current.forEach((url) => URL.revokeObjectURL(url));
+      imageCacheRef.current.clear();
+      imageLoadingRef.current.clear();
+    };
+  }, []);
 
   useEffect(() => {
     if (!token) {
@@ -242,6 +253,59 @@ export default function AdminMessagePage() {
   const currentOriginals = selectedItem?.images ?? [];
   const hasImages = currentThumbs.length > 0;
 
+  const getCacheKey = (type: 'thumb' | 'jpg' | 'original', path: string) => `${type}:${path}`;
+  const getCachedImageUrl = (type: 'thumb' | 'jpg' | 'original', path: string) =>
+    imageCacheRef.current.get(getCacheKey(type, path));
+
+  const cacheImage = useCallback(
+    async (type: 'thumb' | 'jpg' | 'original', path: string) => {
+      if (!token || !path) {
+        return;
+      }
+      const key = getCacheKey(type, path);
+      if (imageCacheRef.current.has(key) || imageLoadingRef.current.has(key)) {
+        return;
+      }
+      imageLoadingRef.current.add(key);
+      try {
+        const response = await fetch(buildImageUrl(type, path, token));
+        if (!response.ok) {
+          throw new Error('image fetch failed');
+        }
+        const blob = await response.blob();
+        const objectUrl = URL.createObjectURL(blob);
+        imageCacheRef.current.set(key, objectUrl);
+        setCacheVersion((prev) => prev + 1);
+      } catch (error) {
+        // ignore
+      } finally {
+        imageLoadingRef.current.delete(key);
+      }
+    },
+    [token]
+  );
+
+  useEffect(() => {
+    if (!token || !selectedItem) {
+      return;
+    }
+    currentThumbs.forEach((path) => {
+      void cacheImage('thumb', path);
+    });
+    currentImages.forEach((path) => {
+      void cacheImage('jpg', path);
+    });
+  }, [cacheImage, currentImages, currentThumbs, selectedItem, token]);
+
+  useEffect(() => {
+    if (!token || !selectedItem || viewerOriginalSet.size === 0) {
+      return;
+    }
+    viewerOriginalSet.forEach((path) => {
+      void cacheImage('original', path);
+    });
+  }, [cacheImage, selectedItem, token, viewerOriginalSet]);
+
   const openViewer = (index: number) => {
     setViewerIndex(index);
     setViewerScale(1);
@@ -336,14 +400,16 @@ export default function AdminMessagePage() {
   const currentDisplayPath = viewerOriginalSet.has(currentOriginalPath)
     ? currentOriginalPath
     : currentImages[viewerIndex];
+  const currentDisplayType = viewerOriginalSet.has(currentOriginalPath) ? 'original' : 'jpg';
   const currentDisplayUrl =
-    currentDisplayPath && token
-      ? buildImageUrl(
-          viewerOriginalSet.has(currentOriginalPath) ? 'original' : 'jpg',
-          currentDisplayPath,
-          token
-        )
-      : undefined;
+    token && currentDisplayPath ? getCachedImageUrl(currentDisplayType, currentDisplayPath) : undefined;
+
+  useEffect(() => {
+    if (!token || !currentDisplayPath) {
+      return;
+    }
+    void cacheImage(currentDisplayType, currentDisplayPath);
+  }, [cacheImage, currentDisplayPath, currentDisplayType, token]);
 
   const headerText = selectedItem
     ? `${selectedItem.id}-${formatDateTime(selectedItem.created_at)}`
@@ -406,8 +472,11 @@ export default function AdminMessagePage() {
                       className="admin-message-thumb"
                       onClick={() => openViewer(index)}
                     >
-                      {token ? (
-                        <img src={buildImageUrl('thumb', path, token)} alt={`缩略图${index + 1}`} />
+                      {token && getCachedImageUrl('thumb', path) ? (
+                        <img
+                          src={getCachedImageUrl('thumb', path)}
+                          alt={`缩略图${index + 1}`}
+                        />
                       ) : (
                         <span>加载中...</span>
                       )}
