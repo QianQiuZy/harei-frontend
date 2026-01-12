@@ -51,6 +51,32 @@ const buildImageUrl = (type: 'thumb' | 'jpg' | 'original', path: string, token: 
     token
   )}`;
 
+const renderMaskedMessage = (message: string) => {
+  if (!message.includes('{{')) {
+    return message;
+  }
+  const nodes: React.ReactNode[] = [];
+  const regex = /{{([\s\S]*?)}}/g;
+  let lastIndex = 0;
+  let match = regex.exec(message);
+  while (match) {
+    if (match.index > lastIndex) {
+      nodes.push(message.slice(lastIndex, match.index));
+    }
+    nodes.push(
+      <span key={`${match.index}-${match[1]}`} className="admin-message-mask">
+        {match[1]}
+      </span>
+    );
+    lastIndex = match.index + match[0].length;
+    match = regex.exec(message);
+  }
+  if (lastIndex < message.length) {
+    nodes.push(message.slice(lastIndex));
+  }
+  return nodes;
+};
+
 export default function AdminMessagePage() {
   const router = useRouter();
   const [token, setToken] = useState<string | null>(null);
@@ -457,7 +483,9 @@ export default function AdminMessagePage() {
             <div className="admin-message-detail-scroll">
               <div className="admin-message-detail-header">{headerText}</div>
               {selectedItem ? (
-                <div className="admin-message-content">{selectedItem.msg}</div>
+                <div className="admin-message-content">
+                  {renderMaskedMessage(selectedItem.msg)}
+                </div>
               ) : (
                 <div className="admin-message-content">请选择左侧留言</div>
               )}
