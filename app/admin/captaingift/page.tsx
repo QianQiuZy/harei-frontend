@@ -112,7 +112,7 @@ export default function AdminCaptaingiftPage() {
     const fetchImage = async () => {
       setImageStatus('loading');
       try {
-        const response = await fetch(`${API_HOST}/captaingift/image?month=${selectedMonth}`, {
+        const response = await fetch(`/api/captaingift-image?month=${selectedMonth}`, {
           cache: 'no-store',
           signal: controller.signal
         });
@@ -146,7 +146,7 @@ export default function AdminCaptaingiftPage() {
     if (!selectedMonth) {
       return '';
     }
-    return `${API_HOST}/captaingift/image?month=${selectedMonth}`;
+    return `/api/captaingift-image?month=${selectedMonth}`;
   }, [selectedMonth]);
 
   const handleFileSelection = (selectedFile: File) => {
