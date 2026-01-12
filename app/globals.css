@@ -1,4 +1,12 @@
-@import url('https://fontsapi.zeoseven.com/219/main/result.css');
+@font-face {
+  font-family: 'Child Fun Sans';
+  src: url('/fonts/child-fun-sans/ChildFunSans.woff2') format('woff2'),
+    url('/fonts/child-fun-sans/ChildFunSans.woff') format('woff'),
+    url('/fonts/child-fun-sans/ChildFunSans.ttf') format('truetype');
+  font-weight: 400;
+  font-style: normal;
+  font-display: swap;
+}
 
 @tailwind base;
 @tailwind components;
@@ -1531,6 +1539,24 @@ a {
   color: #111827;
   white-space: pre-wrap;
   line-height: 1.6;
+}
+
+.admin-message-mask {
+  display: inline;
+  background: #111827;
+  color: transparent;
+  padding: 0 4px;
+  border-radius: 4px;
+  transition: color 0.3s ease, background-color 0.3s ease;
+  box-decoration-break: clone;
+  -webkit-box-decoration-break: clone;
+  word-break: break-word;
+  overflow-wrap: anywhere;
+}
+
+.admin-message-mask:hover {
+  color: #ffffff;
+  background-color: #111827;
 }
 
 .admin-message-divider {
