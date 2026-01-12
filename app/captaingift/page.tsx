@@ -66,7 +66,7 @@ export default function CaptaingiftPage() {
     if (!selectedMonth) {
       return '';
     }
-    return `https://api.harei.cn/captaingift/image?month=${selectedMonth}`;
+    return `/api/captaingift-image?month=${selectedMonth}`;
   }, [selectedMonth]);
 
   return (
