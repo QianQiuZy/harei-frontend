@@ -17,6 +17,31 @@ type UploadErrorResponse = {
 };
 
 const MAX_TOTAL_SIZE = 50 * 1024 * 1024;
+const ALLOWED_IMAGE_EXTENSIONS = [
+  'jpg',
+  'jpeg',
+  'png',
+  'webp',
+  'gif',
+  'bmp',
+  'tif',
+  'tiff',
+  'heif',
+  'heic'
+];
+const ALLOWED_IMAGE_MIME_TYPES = new Set([
+  'image/jpeg',
+  'image/png',
+  'image/webp',
+  'image/gif',
+  'image/bmp',
+  'image/tiff',
+  'image/x-tiff',
+  'image/heif',
+  'image/heic'
+]);
+const ACCEPT_IMAGE_EXTENSIONS = ALLOWED_IMAGE_EXTENSIONS.map((ext) => `.${ext}`).join(',');
+const IMAGE_FORMAT_HINT = ALLOWED_IMAGE_EXTENSIONS.map((ext) => `.${ext}`).join('/');
 
 export default function BoxPage() {
   const [tags, setTags] = useState<string[]>([]);
@@ -143,7 +168,28 @@ export default function BoxPage() {
 
   const handleFilesChange = (fileList: FileList | File[]) => {
     const nextFiles = Array.from(fileList);
-    setFiles((currentFiles) => currentFiles.concat(nextFiles));
+    const { allowedFiles, rejectedCount } = nextFiles.reduce(
+      (result, file) => {
+        const extension = file.name.split('.').pop()?.toLowerCase() ?? '';
+        const isAllowed =
+          ALLOWED_IMAGE_EXTENSIONS.includes(extension) || ALLOWED_IMAGE_MIME_TYPES.has(file.type);
+        if (isAllowed) {
+          result.allowedFiles.push(file);
+        } else {
+          result.rejectedCount += 1;
+        }
+        return result;
+      },
+      { allowedFiles: [] as File[], rejectedCount: 0 }
+    );
+
+    if (rejectedCount > 0) {
+      showAlert(`仅支持上传${IMAGE_FORMAT_HINT}格式图片`);
+    }
+
+    if (allowedFiles.length > 0) {
+      setFiles((currentFiles) => currentFiles.concat(allowedFiles));
+    }
   };
 
   const handleDrop = (event: React.DragEvent<HTMLDivElement>) => {
@@ -312,7 +358,9 @@ export default function BoxPage() {
                 }
               }}
             >
-              <div className="box-upload-title">拖拽/点击添加图片(总和最大50MB)</div>
+              <div className="box-upload-title">
+                拖拽/点击添加图片(总和最大50MB，支持{IMAGE_FORMAT_HINT})
+              </div>
               {previewUrls.length > 0 && (
                 <div className="box-upload-thumbs">
                   {previewUrls.map((url, index) => (
@@ -339,7 +387,7 @@ export default function BoxPage() {
                 ref={fileInputRef}
                 type="file"
                 multiple
-                accept="image/*"
+                accept={ACCEPT_IMAGE_EXTENSIONS}
                 className="box-upload-input"
                 onChange={(event) => {
                   if (event.target.files) {
