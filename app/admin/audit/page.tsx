@@ -427,6 +427,7 @@ export default function AdminMessagePage() {
     ? currentOriginalPath
     : currentImages[viewerIndex];
   const currentDisplayType = viewerOriginalSet.has(currentOriginalPath) ? 'original' : 'jpg';
+  const viewerCountText = currentImages.length ? `${viewerIndex + 1}/${currentImages.length}` : '0/0';
   const currentDisplayUrl =
     token && currentDisplayPath ? getCachedImageUrl(currentDisplayType, currentDisplayPath) : undefined;
 
@@ -569,6 +570,7 @@ export default function AdminMessagePage() {
                 >
                   &gt;
                 </button>
+                <div className="admin-message-viewer-count">{viewerCountText}</div>
                 {!viewerOriginalSet.has(currentOriginalPath) ? (
                   <button
                     type="button"
