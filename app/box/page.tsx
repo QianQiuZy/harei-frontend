@@ -359,7 +359,7 @@ export default function BoxPage() {
               }}
             >
               <div className="box-upload-title">
-                拖拽/点击添加图片(总和最大50MB，支持{IMAGE_FORMAT_HINT})
+                拖拽/点击添加图片
               </div>
               {previewUrls.length > 0 && (
                 <div className="box-upload-thumbs">
