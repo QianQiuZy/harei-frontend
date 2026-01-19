@@ -1706,6 +1706,20 @@ a {
   z-index: 2;
 }
 
+.admin-message-viewer-count {
+  position: absolute;
+  bottom: 16px;
+  right: 16px;
+  border-radius: 999px;
+  padding: 8px 14px;
+  background: rgba(255, 255, 255, 0.9);
+  color: #0f172a;
+  font-size: 13px;
+  font-weight: 600;
+  z-index: 2;
+  pointer-events: none;
+}
+
 .admin-tag-page {
   align-items: flex-start;
 }
