@@ -1551,6 +1551,20 @@ a {
   background-color: #111827;
 }
 
+.admin-message-bv-link {
+  color: #2563eb;
+  text-decoration: underline;
+  text-underline-offset: 2px;
+}
+
+.admin-message-bv-link:hover {
+  color: #1d4ed8;
+}
+
+.admin-message-mask .admin-message-bv-link {
+  color: inherit;
+}
+
 .admin-message-divider {
   height: 2px;
   background: #111827;

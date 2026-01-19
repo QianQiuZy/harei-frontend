@@ -51,9 +51,56 @@ const buildImageUrl = (type: 'thumb' | 'jpg' | 'original', path: string, token: 
     token
   )}`;
 
+const renderBvLinks = (text: string, keyPrefix: string) => {
+  if (!text) {
+    return null;
+  }
+  const regex = /BV[0-9A-Za-z]{10}/g;
+  if (!regex.test(text)) {
+    return text;
+  }
+  regex.lastIndex = 0;
+  const nodes: React.ReactNode[] = [];
+  let lastIndex = 0;
+  let match = regex.exec(text);
+  while (match) {
+    if (match.index > lastIndex) {
+      nodes.push(text.slice(lastIndex, match.index));
+    }
+    const bv = match[0];
+    nodes.push(
+      <a
+        key={`${keyPrefix}-bv-${match.index}`}
+        className="admin-message-bv-link"
+        href={`https://www.bilibili.com/video/${bv}`}
+        target="_blank"
+        rel="noreferrer"
+      >
+        {bv}
+      </a>
+    );
+    lastIndex = match.index + bv.length;
+    match = regex.exec(text);
+  }
+  if (lastIndex < text.length) {
+    nodes.push(text.slice(lastIndex));
+  }
+  return nodes;
+};
+
 const renderMaskedMessage = (message: string) => {
+  const appendNodes = (target: React.ReactNode[], content: React.ReactNode | React.ReactNode[]) => {
+    if (Array.isArray(content)) {
+      target.push(...content);
+      return;
+    }
+    if (content !== null && content !== undefined) {
+      target.push(content);
+    }
+  };
+
   if (!message.includes('{{')) {
-    return message;
+    return renderBvLinks(message, 'plain');
   }
   const nodes: React.ReactNode[] = [];
   const regex = /{{([\s\S]*?)}}/g;
@@ -61,18 +108,18 @@ const renderMaskedMessage = (message: string) => {
   let match = regex.exec(message);
   while (match) {
     if (match.index > lastIndex) {
-      nodes.push(message.slice(lastIndex, match.index));
+      appendNodes(nodes, renderBvLinks(message.slice(lastIndex, match.index), `plain-${lastIndex}`));
     }
     nodes.push(
       <span key={`${match.index}-${match[1]}`} className="admin-message-mask">
-        {match[1]}
+        {renderBvLinks(match[1], `mask-${match.index}`)}
       </span>
     );
     lastIndex = match.index + match[0].length;
     match = regex.exec(message);
   }
   if (lastIndex < message.length) {
-    nodes.push(message.slice(lastIndex));
+    appendNodes(nodes, renderBvLinks(message.slice(lastIndex), `plain-${lastIndex}`));
   }
   return nodes;
 };
