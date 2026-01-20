@@ -31,6 +31,9 @@ type MessageResponse = {
 const API_HOST = 'https://api.harei.cn';
 const TOKEN_KEY = 'harei-admin-token';
 const TOKEN_EXPIRES_KEY = 'harei-admin-token-expires';
+const MIN_VIEWER_SCALE = 0.5;
+const MAX_VIEWER_SCALE = 5;
+const VIEWER_ZOOM_SENSITIVITY = 0.0015;
 
 const formatDateTime = (value: string) => {
   const date = new Date(value);
@@ -138,6 +141,7 @@ export default function AdminMessagePage() {
   const [viewerScale, setViewerScale] = useState(1);
   const [viewerOffset, setViewerOffset] = useState({ x: 0, y: 0 });
   const [viewerDragging, setViewerDragging] = useState(false);
+  const viewerCanvasRef = useRef<HTMLDivElement | null>(null);
   const dragOriginRef = useRef({ x: 0, y: 0 });
   const dragOffsetRef = useRef({ x: 0, y: 0 });
   const dragNextOffsetRef = useRef({ x: 0, y: 0 });
@@ -418,8 +422,26 @@ export default function AdminMessagePage() {
 
   const handleWheel = (event: React.WheelEvent<HTMLDivElement>) => {
     event.preventDefault();
-    const delta = event.deltaY > 0 ? -0.1 : 0.1;
-    setViewerScale((prev) => Math.min(3, Math.max(0.5, prev + delta)));
+    const targetRect =
+      viewerCanvasRef.current?.getBoundingClientRect() ?? event.currentTarget.getBoundingClientRect();
+    const cursorX = event.clientX - targetRect.left - targetRect.width / 2;
+    const cursorY = event.clientY - targetRect.top - targetRect.height / 2;
+    setViewerScale((prevScale) => {
+      const zoomFactor = Math.exp(-event.deltaY * VIEWER_ZOOM_SENSITIVITY);
+      const nextScale = Math.min(
+        MAX_VIEWER_SCALE,
+        Math.max(MIN_VIEWER_SCALE, prevScale * zoomFactor)
+      );
+      if (nextScale === prevScale) {
+        return prevScale;
+      }
+      const ratio = nextScale / prevScale;
+      setViewerOffset((prevOffset) => ({
+        x: prevOffset.x * ratio + cursorX * (1 - ratio),
+        y: prevOffset.y * ratio + cursorY * (1 - ratio)
+      }));
+      return nextScale;
+    });
   };
 
   const handleDragStart = (event: React.MouseEvent<HTMLDivElement>) => {
@@ -589,6 +611,7 @@ export default function AdminMessagePage() {
                   className={`admin-message-viewer-canvas${
                     viewerDragging ? ' is-dragging' : ''
                   }`}
+                  ref={viewerCanvasRef}
                   onMouseDown={handleDragStart}
                 >
                   {currentDisplayUrl ? (
