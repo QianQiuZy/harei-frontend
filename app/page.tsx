@@ -139,11 +139,18 @@ export default function HomePage() {
         className="home-avatar"
       />
       <div className="home-title">花礼Harei</div>
-      <img
-        src="/images/icon/bilibili.png"
-        alt="bilibili"
-        className="home-bilibili"
-      />
+      <a
+        href="https://live.bilibili.com/1820703922"
+        target="_blank"
+        rel="noreferrer noopener"
+        aria-label="前往Bilibili直播间"
+      >
+        <img
+          src="/images/icon/bilibili.png"
+          alt="bilibili"
+          className="home-bilibili"
+        />
+      </a>
       <div className="info-box">{liveText}</div>
       <div className="countdown-wrapper" tabIndex={0}>
         <div className="info-box">纪念日倒计时</div>
