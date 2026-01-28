@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 
 type LiveStatus = {
   status: number | null;
@@ -65,6 +65,8 @@ export default function HomePage() {
   const [now, setNow] = useState(() => Date.now());
   const [liveStatus, setLiveStatus] = useState<LiveStatus>({ status: null, liveTime: null });
   const [randomText, setRandomText] = useState(() => RANDOM_TEXTS[0]);
+  const audioRef = useRef<HTMLAudioElement | null>(null);
+  const fireworksRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
     setRandomText(RANDOM_TEXTS[Math.floor(Math.random() * RANDOM_TEXTS.length)]);
@@ -131,8 +133,199 @@ export default function HomePage() {
       ? `开播中 ${formatDuration(now - liveStatus.liveTime)}`
       : '未开播';
 
+  useEffect(() => {
+    if (!isBirthday) return undefined;
+    const audio = audioRef.current;
+    if (!audio) return undefined;
+
+    let cleanup = () => {};
+
+    const tryPlay = () => audio.play().catch(() => {
+      // Ignore autoplay restrictions.
+    });
+
+    const handleUserGesture = () => {
+      tryPlay();
+      cleanup();
+    };
+
+    const playPromise = audio.play();
+    if (playPromise) {
+      playPromise.catch(() => {
+        document.addEventListener('click', handleUserGesture, { once: true });
+        cleanup = () => document.removeEventListener('click', handleUserGesture);
+      });
+    }
+
+    return () => {
+      cleanup();
+      audio.pause();
+      audio.currentTime = 0;
+    };
+  }, [isBirthday]);
+
+  useEffect(() => {
+    if (!isBirthday) return undefined;
+    const canvas = fireworksRef.current;
+    if (!canvas) return undefined;
+    const context = canvas.getContext('2d');
+    if (!context) return undefined;
+
+    const colors = [
+      '#ffd700',
+      '#ff4d4f',
+      '#ff7a45',
+      '#ffa940',
+      '#bae637',
+      '#2f54eb',
+      '#13c2c2',
+      '#52c41a',
+      '#f759ab',
+      '#9254de',
+      '#36cfc9',
+      '#40a9ff',
+    ];
+    const maxRockets = 5;
+    const maxParticles = 600;
+    const rockets: Array<{
+      x: number;
+      y: number;
+      vx: number;
+      vy: number;
+      targetY: number;
+      color: string;
+    }> = [];
+    const particles: Array<{
+      x: number;
+      y: number;
+      vx: number;
+      vy: number;
+      life: number;
+      color: string;
+    }> = [];
+
+    const resize = () => {
+      canvas.width = window.innerWidth;
+      canvas.height = window.innerHeight;
+    };
+
+    resize();
+    window.addEventListener('resize', resize);
+
+    let lastLaunch = 0;
+    let animationId = 0;
+
+    const launchRocket = () => {
+      const width = canvas.width;
+      const height = canvas.height;
+      const targetY = height * (0.35 + Math.random() * 0.25);
+      if (rockets.length >= maxRockets) return;
+      rockets.push({
+        x: Math.random() * width,
+        y: height + 20,
+        vx: (Math.random() - 0.5) * 0.8,
+        vy: -(12 + Math.random() * 5),
+        targetY,
+        color: colors[Math.floor(Math.random() * colors.length)],
+      });
+    };
+
+    const explode = (rocket: typeof rockets[number]) => {
+      const count = 70 + Math.floor(Math.random() * 40);
+      for (let i = 0; i < count; i += 1) {
+        if (particles.length >= maxParticles) break;
+        const angle = Math.random() * Math.PI * 2;
+        const speed = 2.4 + Math.random() * 4.6;
+        particles.push({
+          x: rocket.x,
+          y: rocket.y,
+          vx: Math.cos(angle) * speed,
+          vy: Math.sin(angle) * speed,
+          life: 60 + Math.random() * 35,
+          color: rocket.color,
+        });
+      }
+    };
+
+    const draw = () => {
+      animationId = requestAnimationFrame(draw);
+
+      const nowTime = performance.now();
+      if (nowTime - lastLaunch > 420) {
+        launchRocket();
+        lastLaunch = nowTime;
+      }
+
+      context.clearRect(0, 0, canvas.width, canvas.height);
+      context.save();
+      context.globalCompositeOperation = 'lighter';
+      context.globalAlpha = 1;
+
+      for (let i = rockets.length - 1; i >= 0; i -= 1) {
+        const rocket = rockets[i];
+        rocket.x += rocket.vx;
+        rocket.y += rocket.vy;
+        rocket.vy += 0.07;
+
+        context.beginPath();
+        context.fillStyle = rocket.color;
+        context.shadowBlur = 8;
+        context.shadowColor = rocket.color;
+        context.arc(rocket.x, rocket.y, 2.8, 0, Math.PI * 2);
+        context.fill();
+
+        if (rocket.y <= rocket.targetY || rocket.vy >= 0) {
+          explode(rocket);
+          rockets.splice(i, 1);
+        }
+      }
+
+      for (let i = particles.length - 1; i >= 0; i -= 1) {
+        const particle = particles[i];
+        particle.x += particle.vx;
+        particle.y += particle.vy;
+        particle.vy += 0.045;
+        particle.life -= 1;
+
+        const alpha = Math.max(0, particle.life / 90);
+        context.beginPath();
+        context.fillStyle = `${particle.color}${Math.floor(alpha * 255).toString(16).padStart(2, '0')}`;
+        context.shadowBlur = 9;
+        context.shadowColor = particle.color;
+        context.arc(particle.x, particle.y, 2.2, 0, Math.PI * 2);
+        context.fill();
+
+        if (particle.life <= 0) {
+          particles.splice(i, 1);
+        }
+      }
+
+      context.restore();
+    };
+
+    draw();
+
+    return () => {
+      window.removeEventListener('resize', resize);
+      cancelAnimationFrame(animationId);
+      rockets.splice(0, rockets.length);
+      particles.splice(0, particles.length);
+    };
+  }, [isBirthday]);
+
   return (
     <div className="home-page">
+      {isBirthday && (
+        <>
+          <audio
+            ref={audioRef}
+            src="https://qianqiuzy-1313476938.cos.ap-shanghai.myqcloud.com/birthday.mp3"
+            loop
+            preload="auto"
+          />
+          <canvas ref={fireworksRef} className="birthday-fireworks" aria-hidden="true" />
+        </>
+      )}
       <img
         src="/images/icon/avatar.jpg"
         alt="avatar"
