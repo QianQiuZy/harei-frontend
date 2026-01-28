@@ -185,8 +185,8 @@ export default function HomePage() {
       '#36cfc9',
       '#40a9ff',
     ];
-    const maxRockets = 5;
-    const maxParticles = 600;
+    const maxRockets = 3;
+    const maxParticles = 300;
     const rockets: Array<{
       x: number;
       y: number;
