@@ -48,6 +48,6 @@ npm run start
 ## 其他说明
 - 项目主要页面位于 `app/` 目录下，各页面以文件夹路由组织。
 - 静态图片资源位于 `public/` 目录。
-- 缓存策略：图片缓存 1 个月，网页缓存 1 周。部署时建议配置如下缓存头以落地策略：
-  - 图片（`/images/**` 等静态资源）：`Cache-Control: public, max-age=2592000, immutable`
-  - 网页（HTML 路由响应）：`Cache-Control: public, max-age=604800, must-revalidate`
+- 缓存策略：图片缓存1年，网页不缓存。部署时建议配置如下缓存头以落地策略：
+  - 图片、css、js：`public, immutable, max-age=31536000`
+  - 网页（HTML 路由响应）：`must-revalidate, proxy-revalidate, no-cache, no-store, max-age=0`
