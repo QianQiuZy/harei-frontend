@@ -3,7 +3,7 @@ import remarkGfm from 'remark-gfm';
 
 const ABOUT_MARKDOWN = `# 花礼Harei的小空间
 
-> 本站由 **千秋紫莹** 个人搭建与维护；一切纠纷与 **花礼 Harei** 无关。
+> 本站由**千秋紫莹**个人搭建与维护；一切纠纷与**花礼 Harei**无关。
 
 ## 🧩概览
 
@@ -36,11 +36,19 @@ const ABOUT_MARKDOWN = `# 花礼Harei的小空间
 
 **服务商**：腾讯云
 
- - 服务器：轻量服务器 4C8G
- - 域名：1 个
+ - 服务器：轻量服务器 4C8G，2C2G×2
+ - 域名：3 个
  - CDN：腾讯云 EO
 
 - 💳**年度维护成本**：约 **2,000 元/年**
+
+---
+
+## 💡VR斗虫相关
+
+ - 斗虫源码：[VR_douchong](https://github.com/QianQiuZy/VR_douchong)
+ - 斗虫衍生：[hihi粉丝站](https://dc.hihivr.top)
+ - 斗虫QQbot插件：[nonebot-plugin](https://github.com/QianQiuZy/nonebot-plugin-vrpspdouchong)
 
 ---
 
