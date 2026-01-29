@@ -319,7 +319,7 @@ export default function HomePage() {
         <>
           <audio
             ref={audioRef}
-            src="https://qianqiuzy-1313476938.cos.ap-shanghai.myqcloud.com/birthday.mp3"
+            src="/music/birthday.mp3"
             loop
             preload="auto"
           />
