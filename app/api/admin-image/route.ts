@@ -1,11 +1,12 @@
 import { NextResponse } from 'next/server';
 
 const API_HOST = 'https://api.harei.cn';
-const CACHE_CONTROL = 'private, max-age=300, stale-while-revalidate=600';
+const CACHE_CONTROL_OK = 'private, max-age=31536000, immutable';
+
 const TYPE_MAP: Record<string, string> = {
   thumb: 'thumb',
   jpg: 'jpg',
-  original: 'original'
+  original: 'original',
 };
 
 export async function GET(request: Request) {
@@ -22,23 +23,23 @@ export async function GET(request: Request) {
 
   try {
     const response = await fetch(targetUrl, {
+      cache: 'no-store',
       headers: {
-        Authorization: `Bearer ${token}`
-      }
+        Authorization: `Bearer ${token}`,
+      },
     });
 
     const headers = new Headers();
     const contentType = response.headers.get('content-type');
-    if (contentType) {
-      headers.set('Content-Type', contentType);
-    }
-    headers.set('Cache-Control', CACHE_CONTROL);
+    if (contentType) headers.set('Content-Type', contentType);
+
+    headers.set('Cache-Control', response.ok ? CACHE_CONTROL_OK : 'no-store');
 
     return new NextResponse(response.body, {
       status: response.status,
-      headers
+      headers,
     });
-  } catch (error) {
+  } catch {
     return NextResponse.json({ error: 'proxy failed' }, { status: 502 });
   }
 }
