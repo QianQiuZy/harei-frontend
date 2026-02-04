@@ -49,10 +49,8 @@ const formatDateTime = (value: string) => {
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 };
 
-const buildImageUrl = (type: 'thumb' | 'jpg' | 'original', path: string, token: string) =>
-  `/api/admin-image?type=${type}&path=${encodeURIComponent(path)}&token=${encodeURIComponent(
-    token
-  )}`;
+const buildImageUrl = (type: 'thumb' | 'jpg' | 'original', path: string) =>
+  `/api/admin-image?type=${type}&path=${encodeURIComponent(path)}`;
 
 const renderBvLinks = (text: string, keyPrefix: string) => {
   if (!text) {
@@ -345,7 +343,11 @@ export default function AdminMessagePage() {
       }
       imageLoadingRef.current.add(key);
       try {
-        const response = await fetch(buildImageUrl(type, path, token));
+        const response = await fetch(buildImageUrl(type, path), {
+          headers: {
+            Authorization: `Bearer ${token}`
+          }
+        });
         if (!response.ok) {
           throw new Error('image fetch failed');
         }
