@@ -13,7 +13,8 @@ export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
   const type = searchParams.get('type');
   const path = searchParams.get('path');
-  const token = searchParams.get('token');
+  const authHeader = request.headers.get('authorization') ?? '';
+  const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : '';
 
   if (!type || !path || !token || !TYPE_MAP[type]) {
     return NextResponse.json({ error: 'invalid request' }, { status: 400 });
