@@ -15,8 +15,17 @@ type DownloadResponse = {
 
 const isExternalLink = (path: string) => /^https?:\/\//i.test(path);
 
-const getDownloadUrl = (path: string) =>
-  `https://api.harei.cn/download/file?path=${encodeURIComponent(path)}`;
+const getDownloadUrl = (downloadId: string) =>
+  `/api/download-file?download_id=${encodeURIComponent(downloadId)}`;
+
+const getDownloadId = (path: string) => {
+  try {
+    const url = new URL(path, 'https://api.harei.cn');
+    return url.searchParams.get('download_id');
+  } catch {
+    return null;
+  }
+};
 
 export default function DownloadPage() {
   const [items, setItems] = useState<DownloadItem[]>([]);
@@ -69,7 +78,13 @@ export default function DownloadPage() {
       return;
     }
 
-    window.location.href = getDownloadUrl(trimmedPath);
+    const downloadId = getDownloadId(trimmedPath);
+    if (!downloadId) {
+      window.location.href = trimmedPath;
+      return;
+    }
+
+    window.location.href = getDownloadUrl(downloadId);
   };
 
   return (
