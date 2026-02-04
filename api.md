@@ -1,7 +1,5 @@
 # Harei API 清单
 
-> 此react前端的最终host为 `https://harei.cn`
-> 所有下述api的host均为 `https://api.harei.cn`
 > 说明：除特别标注外，所有需要鉴权的接口使用 `Authorization: Bearer <token>` 请求头。
 
 ## 认证
@@ -145,8 +143,9 @@
   ]
 }
 ```
+> 说明：`path` 仅返回外部可访问链接，内部文件会返回 `/download/file?download_id=...` 形式的链接。
 
-### GET `/download/file?path=...`（无需 Token）
+### GET `/download/file?download_id=...`（无需 Token）
 **响应**：文件内容（仅支持内部路径）
 
 ### POST `/download/add`（需要 Token）
