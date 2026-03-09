@@ -133,6 +133,7 @@ export default function AdminMessagePage() {
   const [readIds, setReadIds] = useState<Set<number>>(new Set());
   const [statusMessage, setStatusMessage] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(true);
+  const [selectedTag, setSelectedTag] = useState<string>('');
 
   const [viewerOpen, setViewerOpen] = useState(false);
   const [viewerIndex, setViewerIndex] = useState(0);
@@ -236,10 +237,52 @@ export default function AdminMessagePage() {
     fetchItems();
   }, [token]);
 
-  const selectedItem = useMemo(
-    () => items.find((item) => item.id === selectedId) ?? null,
-    [items, selectedId]
+  const availableTags = useMemo(
+    () =>
+      Array.from(
+        new Set(
+          items
+            .map((item) => item.tag?.trim())
+            .filter((tag): tag is string => Boolean(tag))
+        )
+      ),
+    [items]
   );
+
+  const filteredItems = useMemo(() => {
+    const sortedItems = [...items].sort((a, b) => a.id - b.id);
+    if (!selectedTag) {
+      return sortedItems;
+    }
+    return sortedItems.filter((item) => item.tag === selectedTag);
+  }, [items, selectedTag]);
+
+  const selectedItem = useMemo(
+    () => filteredItems.find((item) => item.id === selectedId) ?? null,
+    [filteredItems, selectedId]
+  );
+
+  useEffect(() => {
+    if (!selectedTag) {
+      return;
+    }
+    if (!availableTags.includes(selectedTag)) {
+      setSelectedTag('');
+    }
+  }, [availableTags, selectedTag]);
+
+  useEffect(() => {
+    if (!filteredItems.length) {
+      setSelectedId(null);
+      return;
+    }
+    setSelectedId((current) => {
+      if (current !== null && filteredItems.some((item) => item.id === current)) {
+        return current;
+      }
+      return filteredItems[0].id;
+    });
+  }, [filteredItems]);
 
   useEffect(() => {
     if (selectedId === null) {
@@ -304,11 +347,14 @@ export default function AdminMessagePage() {
       return;
     }
     try {
+      const hasTagFilter = Boolean(selectedTag);
       const response = await fetch(`${API_HOST}/box/approve`, {
         method: 'POST',
         headers: {
-          Authorization: `Bearer ${token}`
-        }
+          Authorization: `Bearer ${token}`,
+          ...(hasTagFilter ? { 'Content-Type': 'application/json' } : {})
+        },
+        ...(hasTagFilter ? { body: JSON.stringify({ tag: selectedTag }) } : {})
       });
       if (!response.ok) {
         throw new Error('archive failed');
@@ -512,14 +558,30 @@ export default function AdminMessagePage() {
   const headerText = selectedItem
     ? `${selectedItem.id}-${formatDateTime(selectedItem.created_at)}`
     : '暂无留言';
-  const sortedItems = useMemo(() => [...items].sort((a, b) => a.id - b.id), [items]);
+  const showTagFilter = availableTags.length >= 2;
 
   return (
     <section className="admin-page admin-message-page">
       <div className="admin-message-card">
         <header className="admin-message-header">
           <div>
-            <h1 className="admin-message-title">留言箱</h1>
+            <div className="admin-message-title-row">
+              <h1 className="admin-message-title">留言箱</h1>
+              {showTagFilter ? (
+                <select
+                  className="admin-message-tag-filter"
+                  value={selectedTag}
+                  onChange={(event) => setSelectedTag(event.target.value)}
+                >
+                  <option value="">全部tag</option>
+                  {availableTags.map((tag) => (
+                    <option key={tag} value={tag}>
+                      {tag}
+                    </option>
+                  ))}
+                </select>
+              ) : null}
+            </div>
             <p className="admin-message-subtitle">待审核留言列表</p>
           </div>
           {statusMessage ? <span className="admin-message-status">{statusMessage}</span> : null}
@@ -528,10 +590,10 @@ export default function AdminMessagePage() {
           <aside className="admin-message-list">
             {isLoading ? (
               <div className="admin-message-empty">加载中...</div>
-            ) : items.length === 0 ? (
+            ) : filteredItems.length === 0 ? (
               <div className="admin-message-empty">暂无留言</div>
             ) : (
-              sortedItems.map((item) => {
+              filteredItems.map((item) => {
                 const label = `${item.id}-${formatDateTime(item.created_at)}`;
                 const isSelected = item.id === selectedId;
                 const isRead = readIds.has(item.id);
