@@ -2,6 +2,8 @@
 
 > 说明：除特别标注外，所有需要鉴权的接口使用 `Authorization: Bearer <token>` 请求头。
 
+> host：`https://api.harei.cn`
+
 ## 认证
 ### POST `/login`（无需 Token）
 **请求体**
