@@ -1,0 +1,47 @@
+.heading { display: flex; align-items: end; justify-content: space-between; gap: 24px; margin-bottom: 24px; padding-bottom: 20px; border-bottom: 2px solid var(--music-ink); }
+.heading a { display: inline-flex; align-items: center; gap: 5px; margin-bottom: 14px; color: var(--music-muted); font-size: 12px; text-decoration: none; }
+.heading p { margin: 0 0 5px; color: var(--music-coral-dark); font-size: 11px; font-weight: 800; letter-spacing: 0.16em; }
+.heading h1 { margin: 0; font-family: "Noto Serif SC Variable", serif; font-size: 32px; }
+.active,
+.archived { padding: 6px 10px; border-radius: 999px; font-size: 11px; font-weight: 700; }
+.active { color: var(--music-success); background: color-mix(in srgb, var(--music-success) 12%, transparent); }
+.archived { color: var(--music-muted); background: var(--music-paper-deep); }
+.songForm,
+.performanceForm { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 16px; padding: 24px; background: var(--music-surface); border: 1px solid var(--music-line); border-radius: 16px; }
+.songForm label,
+.performanceForm label { display: grid; gap: 7px; color: var(--music-muted); font-size: 12px; }
+.songForm input,
+.songForm select,
+.songForm textarea,
+.performanceForm input { width: 100%; min-height: 44px; padding: 10px 12px; color: var(--music-ink); background: var(--music-surface); border: 1px solid var(--music-line); border-radius: 9px; font: inherit; }
+.songForm input:focus,
+.songForm select:focus,
+.songForm textarea:focus,
+.performanceForm input:focus { outline: 3px solid color-mix(in srgb, var(--music-coral) 25%, transparent); border-color: var(--music-coral); }
+.songForm input:disabled { color: var(--music-muted); background: var(--music-paper-deep); }
+.full,
+.wide { grid-column: 1 / -1; }
+.formActions { display: flex; flex-wrap: wrap; gap: 10px; }
+.formActions button { min-height: 42px; display: inline-flex; align-items: center; justify-content: center; gap: 7px; padding: 0 14px; color: var(--music-ink); background: var(--music-paper); border: 1px solid var(--music-line); border-radius: 9px; font-weight: 700; cursor: pointer; }
+.formActions .primary { color: var(--music-surface); background: var(--music-ink); border-color: var(--music-ink); }
+.formActions .primary:hover { color: var(--music-ink); background: var(--music-lemon); border-color: var(--music-lemon); }
+.message { margin: 12px 0; color: var(--music-success); font-size: 13px; }
+.message.warning { color: var(--music-warning); }
+.performancePanel { margin-top: 24px; }
+.performancePanel > header { display: flex; align-items: end; justify-content: space-between; margin-bottom: 12px; }
+.performancePanel > header p { margin: 0 0 5px; color: var(--music-coral-dark); font-size: 10px; font-weight: 800; letter-spacing: 0.16em; }
+.performancePanel > header h2 { margin: 0; font-family: "Noto Serif SC Variable", serif; }
+.performancePanel > header > span { color: var(--music-muted); font-size: 12px; }
+.performanceForm { grid-template-columns: repeat(3, minmax(0, 1fr)); background: color-mix(in srgb, var(--music-paper-deep) 62%, transparent); }
+.performanceList { display: grid; gap: 8px; margin: 16px 0 0; padding: 0; list-style: none; }
+.performanceList li { min-height: 64px; display: grid; grid-template-columns: 96px minmax(0, 1fr) repeat(3, 42px); gap: 8px; align-items: center; padding: 10px 12px; background: var(--music-surface); border: 1px solid var(--music-line); border-radius: 12px; }
+.performanceList time { color: var(--music-coral-dark); font-family: "Noto Serif SC Variable", serif; font-weight: 700; }
+.performanceList li > div { min-width: 0; }
+.performanceList li strong,
+.performanceList li span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.performanceList li span { margin-top: 3px; color: var(--music-muted); font-size: 11px; }
+.performanceList a,
+.performanceList li > button { width: 42px; height: 42px; display: grid; place-items: center; color: var(--music-ink); background: var(--music-paper); border: 1px solid var(--music-line); border-radius: 8px; cursor: pointer; }
+.performanceList a:hover,
+.performanceList li > button:hover { color: var(--music-surface); background: var(--music-ink); }
+.performanceList .dangerIcon:hover { background: var(--music-error); border-color: var(--music-error); }

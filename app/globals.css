@@ -1,11 +1,27 @@
 @import url('https://fontsapi.zeoseven.com/320/main/result.css');
-
+/* biome-ignore lint/suspicious/noUnknownAtRules: Tailwind processes this directive. */
 @tailwind base;
+/* biome-ignore lint/suspicious/noUnknownAtRules: Tailwind processes this directive. */
 @tailwind components;
+/* biome-ignore lint/suspicious/noUnknownAtRules: Tailwind processes this directive. */
 @tailwind utilities;
 
 :root {
+  --music-paper: #f6f6f6;
+  --music-paper-deep: #e9e9ee;
+  --music-surface: #ffffff;
+  --music-ink: #282837;
+  --music-muted: #666878;
+  --music-coral: #f04a91;
+  --music-coral-dark: #ca2f72;
+  --music-lemon: #ffc42e;
+  --music-blue: #71a9d1;
+  --music-line: rgba(40, 40, 55, 0.16);
+  --music-success: #287a52;
+  --music-warning: #a76700;
+  --music-error: #b4233c;
   color-scheme: light;
+  /*font-family: 'Noto Sans SC Variable', 'Source Han Sans SC', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;*/
   font-family: 'JinzisheZhenhao', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
   background-color: #0f172a;
   color: #1f2937;
@@ -709,14 +725,10 @@ a {
   border-bottom: 1px solid #e5e7eb;
 }
 
-.huangdou-list-header {
+.huangdou-list li.huangdou-list-header {
   font-weight: 600;
   color: #111827;
   background: rgba(15, 23, 42, 0.04);
-}
-
-.huangdou-list-header .huangdou-list-count {
-  color: #111827;
 }
 
 .huangdou-list-name {
@@ -725,6 +737,10 @@ a {
 
 .huangdou-list-count {
   color: #4b5563;
+}
+
+.huangdou-list-header .huangdou-list-count {
+  color: #111827;
 }
 
 .huangdou-state {
@@ -2239,34 +2255,6 @@ a {
 }
 
 @media (max-width: 640px) {
-  .admin-page {
-    padding: 32px 16px 40px;
-  }
-
-  .admin-tag-card {
-    width: 100%;
-  }
-
-  .admin-download-card {
-    width: 100%;
-  }
-
-  .admin-captaingift-card {
-    width: 100%;
-  }
-
-  .admin-captains-card {
-    width: 100%;
-  }
-
-  .admin-grid {
-    grid-template-columns: 1fr;
-  }
-
-  .admin-panel-card {
-    padding: 20px;
-  }
-
   .sidebar {
     width: min(200px, 70vw);
     padding: 16px 14px;
@@ -2378,11 +2366,6 @@ a {
   }
 
   .about-card {
-    width: 90%;
-    padding: 20px;
-  }
-
-  .admin-card {
     width: 90%;
     padding: 20px;
   }

@@ -1,0 +1,281 @@
+.catalog {
+  --paper: var(--music-paper);
+  --paper-deep: var(--music-paper-deep);
+  --ink: var(--music-ink);
+  --muted: var(--music-muted);
+  --coral: var(--music-coral);
+  --coral-dark: var(--music-coral-dark);
+  --lemon: var(--music-lemon);
+  --blue: var(--music-blue);
+  --surface: var(--music-surface);
+  --line: var(--music-line);
+  width: min(1180px, calc(100% - 32px));
+  min-height: calc(100dvh - 32px);
+  margin: 0 auto;
+  padding: 52px 50px 80px;
+  color: var(--ink);
+  background: var(--paper);
+  border: 1px solid var(--line);
+  border-radius: 28px;
+  box-shadow: 0 18px 50px color-mix(in srgb, var(--music-ink) 12%, transparent);
+  font-family: "Noto Sans SC Variable", "Source Han Sans SC", "Microsoft YaHei", sans-serif;
+}
+
+.heading {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 24px;
+  margin-bottom: 20px;
+  padding-bottom: 22px;
+  border-bottom: 2px solid var(--ink);
+}
+
+.identity {
+  display: flex;
+  align-items: center;
+  gap: 16px;
+  min-width: 0;
+}
+
+.identityIcon {
+  width: 96px;
+  height: 96px;
+  display: grid;
+  flex: 0 0 auto;
+  place-items: center;
+  color: var(--coral-dark);
+  background:
+    linear-gradient(145deg, color-mix(in srgb, var(--music-blue) 20%, transparent), color-mix(in srgb, var(--music-coral) 13%, transparent)),
+    var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 24px;
+  box-shadow: 5px 6px 0 color-mix(in srgb, var(--music-lemon) 30%, transparent);
+  overflow: hidden;
+}
+
+.identityImage {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+}
+
+.identity p {
+  margin: 0 0 8px;
+  color: var(--coral-dark);
+  font-size: 11px;
+  font-weight: 800;
+  letter-spacing: 0.2em;
+}
+
+.identity h1 {
+  margin: 0;
+  font-family: "Noto Serif SC Variable", "Source Han Serif SC", "Songti SC", SimSun, serif;
+  font-size: clamp(2.35rem, 5vw, 3.6rem);
+  font-weight: 800;
+  line-height: 1.1;
+  letter-spacing: -0.05em;
+}
+
+.stats {
+  color: var(--muted);
+  font-size: 13px;
+  text-align: right;
+}
+
+.stats strong {
+  color: var(--coral-dark);
+  font-family: "Noto Serif SC Variable", "Source Han Serif SC", serif;
+  font-size: 28px;
+}
+
+.resultBar {
+  min-height: 58px;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 16px;
+  color: var(--muted);
+  font-size: 13px;
+}
+
+.resultBar p,
+.resultBar span {
+  margin: 0;
+}
+
+.songList {
+  display: grid;
+  gap: 10px;
+}
+
+.songCard {
+  min-height: 66px;
+  display: grid;
+  grid-template-columns: minmax(0, 1fr) auto;
+  gap: 16px;
+  align-items: center;
+  padding: 10px 11px 10px 20px;
+  background: var(--surface);
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  box-shadow: 0 3px 0 color-mix(in srgb, var(--music-ink) 3.5%, transparent);
+  transition: background 180ms ease, border-color 180ms ease, transform 180ms ease;
+}
+
+.songCard:hover,
+.songCard:focus-within {
+  background: var(--paper);
+  border-color: color-mix(in srgb, var(--music-coral) 42%, transparent);
+  transform: translateX(3px);
+}
+
+.songTitle {
+  min-width: 0;
+  padding: 0;
+  color: var(--ink);
+  background: transparent;
+  border: 0;
+  font-family: "Noto Serif SC Variable", "Source Han Serif SC", serif;
+  text-align: left;
+  cursor: pointer;
+}
+
+.songTitle span,
+.songTitle small {
+  display: block;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.songTitle span {
+  font-size: 16px;
+  font-weight: 800;
+  line-height: 1.35;
+}
+
+.songTitle small {
+  margin-top: 3px;
+  color: var(--muted);
+  font-family: "Noto Sans SC Variable", "Microsoft YaHei", sans-serif;
+  font-size: 11px;
+  font-weight: 400;
+}
+
+.songTitle:hover span {
+  color: var(--coral-dark);
+}
+
+.listenLink {
+  min-height: 42px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 7px 11px;
+  color: var(--surface);
+  background: var(--ink);
+  border: 1px solid var(--ink);
+  border-radius: 10px;
+  font-size: 11px;
+  font-weight: 700;
+  text-decoration: none;
+  cursor: pointer;
+  transition: color 160ms ease, background 160ms ease, transform 160ms ease;
+}
+
+.listenLink:hover {
+  color: var(--ink);
+  background: var(--lemon);
+  border-color: var(--lemon);
+  transform: translateY(-2px);
+}
+
+.noLink {
+  color: var(--muted);
+  font-size: 11px;
+}
+
+.loadingCard {
+  height: 66px;
+  border: 1px solid var(--line);
+  border-radius: 14px;
+  background: linear-gradient(100deg, transparent 35%, color-mix(in srgb, var(--music-surface) 80%, transparent) 50%, transparent 65%);
+  background-size: 220% 100%;
+  animation: loading 1.4s infinite;
+}
+
+.empty {
+  min-height: 240px;
+  display: grid;
+  place-content: center;
+  gap: 8px;
+  color: var(--muted);
+  text-align: center;
+}
+
+.empty strong {
+  color: var(--ink);
+  font-family: "Noto Serif SC Variable", "Source Han Serif SC", serif;
+  font-size: 22px;
+}
+
+@keyframes loading {
+  to { background-position: -220% 0; }
+}
+
+.backToTop {
+  position: fixed;
+  right: 20px;
+  bottom: 20px;
+  z-index: 20;
+  width: 50px;
+  height: 50px;
+  display: grid;
+  place-items: center;
+  padding: 0;
+  color: var(--surface);
+  background: var(--ink);
+  border: 1px solid color-mix(in srgb, var(--surface) 20%, transparent);
+  border-radius: 50%;
+  box-shadow: 0 12px 28px color-mix(in srgb, var(--music-ink) 24%, transparent);
+  opacity: 0;
+  pointer-events: none;
+  transform: scale(0.88) translateY(12px);
+  transition: opacity 240ms ease-in-out, transform 240ms ease-in-out, background 160ms ease-out;
+  cursor: pointer;
+}
+
+.backToTop:hover { background: var(--coral-dark); }
+
+.backToTopVisible {
+  opacity: 1;
+  pointer-events: auto;
+  transform: scale(1) translateY(0);
+}
+
+@media (max-width: 700px) {
+  .catalog {
+    width: calc(100% - 16px);
+    margin: 0 auto;
+    padding: 28px 16px 64px;
+    border-radius: 20px;
+  }
+
+  .heading { align-items: flex-start; }
+  .identity { gap: 12px; }
+  .identityIcon { width: 76px; height: 76px; border-radius: 19px; }
+  .identity h1 { font-size: 2.35rem; }
+  .stats { display: none; }
+  .songCard { min-height: 62px; padding-left: 16px; border-radius: 12px; }
+  .songTitle span { font-size: 15px; }
+  .listenLink { min-width: 68px; min-height: 42px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .songCard,
+  .listenLink,
+  .backToTop,
+  .loadingCard { animation: none; transition-duration: 0.01ms; }
+}

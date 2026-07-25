@@ -63,6 +63,7 @@ const ABOUT_MARKDOWN = `# 花礼Harei的小空间
 ## 👤关于作者
 
 - ✉️邮箱：qianqiuzy@qq.com
+- ✨歌单设计：[小鼠在摸鱼](https://space.bilibili.com/1710551249)
 - 🔗Bilibili：[千秋紫莹](https://space.bilibili.com/351708822)
 - 👋赞助支持：[爱发电](https://ifdian.net/a/qianqiuzy)
 `;

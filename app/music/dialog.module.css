@@ -1,0 +1,78 @@
+.dialog {
+  width: min(640px, calc(100% - 32px));
+  max-height: min(760px, calc(100dvh - 32px));
+  padding: 0;
+  color: var(--music-ink);
+  background: var(--music-surface);
+  border: 1px solid var(--music-line);
+  border-radius: 24px;
+  box-shadow: 0 24px 70px color-mix(in srgb, var(--music-ink) 28%, transparent);
+  overflow: hidden;
+}
+
+.dialog::backdrop { background: color-mix(in srgb, var(--music-ink) 72%, transparent); backdrop-filter: blur(4px); }
+.dialog[open] { animation: dialog-in 360ms cubic-bezier(0.2, 0.9, 0.28, 1.18) both; }
+.shell { position: relative; max-height: min(760px, calc(100dvh - 32px)); overflow-y: auto; }
+
+.close {
+  position: sticky;
+  z-index: 2;
+  top: 14px;
+  width: 42px;
+  height: 42px;
+  display: grid;
+  place-items: center;
+  margin: 14px 14px -56px auto;
+  color: var(--music-ink);
+  background: var(--music-paper-deep);
+  border: 0;
+  border-radius: 50%;
+  cursor: pointer;
+}
+
+.close:hover { color: var(--music-surface); background: var(--music-coral); }
+.close:focus-visible { outline: 3px solid color-mix(in srgb, var(--music-coral) 35%, transparent); outline-offset: 2px; }
+
+.hero { padding: 36px 32px 16px; }
+.hero p { margin: 0 0 8px; color: var(--music-coral-dark); font-size: 10px; font-weight: 800; letter-spacing: 0.18em; }
+.hero h2 { max-width: calc(100% - 48px); margin: 0; font-family: "Noto Serif SC Variable", serif; font-size: clamp(2rem, 5vw, 2.65rem); line-height: 1.2; }
+.hero span { display: block; margin-top: 10px; color: var(--music-muted); font-family: "Noto Serif SC Variable", serif; }
+.body { padding: 6px 32px 32px; }
+.tags { display: flex; flex-wrap: wrap; gap: 7px; margin: 0; padding: 0 0 18px; border-bottom: 1px solid var(--music-line); list-style: none; }
+.tags li { padding: 5px 11px; color: var(--music-muted); background: var(--music-paper); border: 1px solid var(--music-line); border-radius: 999px; font-size: 11px; font-weight: 700; }
+.notes { padding: 12px 16px; color: var(--music-muted); background: color-mix(in srgb, var(--music-lemon) 16%, transparent); border-left: 3px solid var(--music-lemon); border-radius: 8px; font-size: 13px; }
+.historyHeading { display: flex; align-items: end; justify-content: space-between; margin: 20px 0 12px; }
+.historyHeading h3 { margin: 0; font-family: "Noto Serif SC Variable", serif; font-size: 22px; }
+.historyHeading p { margin: 0; color: var(--music-muted); font-size: 11px; }
+.historyList { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
+.historyItem { min-height: 64px; display: grid; grid-template-columns: 56px minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 9px 11px; background: var(--music-paper); border: 1px solid var(--music-line); border-radius: 12px; }
+.historyItem time { font-family: "Noto Serif SC Variable", serif; font-size: 11px; text-align: center; }
+.historyItem time strong { display: block; color: var(--music-coral-dark); font-size: 16px; }
+.historyItem div { min-width: 0; }
+.historyItem div strong,
+.historyItem div span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.historyItem div strong { font-family: "Noto Serif SC Variable", serif; font-size: 12px; }
+.historyItem div span { margin-top: 3px; color: var(--music-muted); font-size: 10px; }
+.historyItem a { min-height: 42px; display: inline-flex; align-items: center; gap: 6px; padding: 7px 10px; color: var(--music-surface); background: var(--music-ink); border-radius: 8px; font-size: 11px; font-weight: 700; text-decoration: none; }
+.historyItem a:hover { color: var(--music-ink); background: var(--music-lemon); }
+.missing { color: var(--music-muted); font-size: 11px; }
+.state,
+.error { min-height: 220px; display: grid; place-items: center; margin: 0; padding: 40px; }
+.error { color: var(--music-error); }
+
+@keyframes dialog-in {
+  from { opacity: 0; transform: translateY(22px) scale(0.92); }
+  to { opacity: 1; transform: translateY(0) scale(1); }
+}
+
+@media (max-width: 700px) {
+  .dialog { width: calc(100% - 16px); max-height: calc(100dvh - 16px); border-radius: 20px; }
+  .shell { max-height: calc(100dvh - 16px); }
+  .hero { padding: 30px 18px 12px; }
+  .body { padding: 6px 18px 24px; }
+  .historyItem { grid-template-columns: 48px minmax(0, 1fr) auto; gap: 8px; padding: 8px; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .dialog[open] { animation: none; }
+}

@@ -179,20 +179,42 @@
 
 ## 音乐
 ### GET `/music`（无需 Token）
+支持 `q`、`search_mode=title|artist`、`genre`、`language`、`work_type`、`sort=title|recent|count`、`order=asc|desc`、`page`、`page_size`（最大 1000）。响应包含 `ETag`，匹配的 `If-None-Match` 返回 `304`。
+
+### 音乐管理
+`POST /music-manage/login` 签发仅含 `music:manage` 的 Token。其余 `/music-manage` 路由均需该 scope，包括统计、歌曲管理、归档/恢复、演唱记录管理、XLSX 模板与批量导入、审计。歌曲与演唱记录的 `source_key` 均由服务端生成；BV 号或直播间 ID 从歌切/直播链接自动解析。所有歌曲或演唱记录变更均需提交当前歌曲 `version`；过期写入返回 `409`。公开详情为 `GET /music/{source_key}`，完整快照为 `GET /music/export`。
+
+- `GET /music-manage/performances/template`：下载包含 `导入数据`、`歌曲列表` 的 XLSX 模板。
+- `POST /music-manage/performances/import`：上传最大 5 MiB 的 XLSX；按歌名完全匹配，逐行返回校验错误，并保证整批原子写入。
+
 **响应**
 ```json
 {
   "code": 0,
   "items": [
     {
-      "music_id": 1,
+      "song_id": 1,
+      "id": "song_123",
+      "source_key": "song_123",
       "title": "string",
       "artist": "string",
-      "type": "string",
+      "artists": ["string"],
+      "genre": "华语流行",
       "language": "string",
-      "note": "string"
+      "workType": "翻唱",
+      "notes": "",
+      "metadataStatus": "complete",
+      "latestPerformanceAt": "2026-07-25",
+      "latestLink": "https://www.bilibili.com/video/BV1...",
+      "performanceCount": 1
     }
-  ]
+  ],
+  "total": 478,
+  "page": 1,
+  "page_size": 30,
+  "facets": { "genres": [], "languages": [], "workTypes": [] },
+  "stats": { "song_count": 478, "performance_count": 2685 },
+  "revision": 0
 }
 ```
 
