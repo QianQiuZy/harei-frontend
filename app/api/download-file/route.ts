@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-const API_HOST = 'https://api.harei.cn';
+const API_HOST = 'http://127.0.0.1:6555';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);

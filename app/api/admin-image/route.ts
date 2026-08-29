@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
 
-const API_HOST = 'https://api.harei.cn';
+const API_HOST = 'http://127.0.0.1:6555';
 const CACHE_CONTROL_OK = 'private, max-age=31536000, immutable';
 
 const TYPE_MAP: Record<string, string> = {
