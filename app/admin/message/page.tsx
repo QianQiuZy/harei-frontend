@@ -1,7 +1,8 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useEffect, useMemo, useRef, useState } from 'react';
+import { useAdminImageCache } from '../use-admin-image-cache';
 
 type BoxItem = {
   id: number;
@@ -48,9 +49,6 @@ const formatDateTime = (value: string) => {
   const seconds = String(date.getSeconds()).padStart(2, '0');
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 };
-
-const buildImageUrl = (type: 'thumb' | 'jpg' | 'original', path: string) =>
-  `/api/admin-image?type=${type}&path=${encodeURIComponent(path)}`;
 
 const renderBvLinks = (text: string, keyPrefix: string) => {
   if (!text) {
@@ -149,9 +147,6 @@ export default function AdminMessagePage() {
   const viewerClickGuardRef = useRef(false);
   const [viewerOriginalSet, setViewerOriginalSet] = useState<Set<string>>(new Set());
   const previousSelectedRef = useRef<number | null>(null);
-  const imageCacheRef = useRef<Map<string, string>>(new Map());
-  const imageLoadingRef = useRef<Set<string>>(new Set());
-  const [, setCacheVersion] = useState(0);
 
   useEffect(() => {
     const checkAuth = async () => {
@@ -191,14 +186,6 @@ export default function AdminMessagePage() {
 
     checkAuth();
   }, [router]);
-
-  useEffect(() => {
-    return () => {
-      imageCacheRef.current.forEach((url) => URL.revokeObjectURL(url));
-      imageCacheRef.current.clear();
-      imageLoadingRef.current.clear();
-    };
-  }, []);
 
   useEffect(() => {
     if (!token) {
@@ -374,62 +361,29 @@ export default function AdminMessagePage() {
   const currentOriginals = selectedItem?.images ?? [];
   const hasImages = currentThumbs.length > 0;
 
-  const getCacheKey = (type: 'thumb' | 'jpg' | 'original', path: string) => `${type}:${path}`;
-  const getCachedImageUrl = (type: 'thumb' | 'jpg' | 'original', path: string) =>
-    imageCacheRef.current.get(getCacheKey(type, path));
-
-  const cacheImage = useCallback(
-    async (type: 'thumb' | 'jpg' | 'original', path: string) => {
-      if (!token || !path) {
-        return;
-      }
-      const key = getCacheKey(type, path);
-      if (imageCacheRef.current.has(key) || imageLoadingRef.current.has(key)) {
-        return;
-      }
-      imageLoadingRef.current.add(key);
-      try {
-        const response = await fetch(buildImageUrl(type, path), {
-          headers: {
-            Authorization: `Bearer ${token}`
-          }
-        });
-        if (!response.ok) {
-          throw new Error('image fetch failed');
-        }
-        const blob = await response.blob();
-        const objectUrl = URL.createObjectURL(blob);
-        imageCacheRef.current.set(key, objectUrl);
-        setCacheVersion((prev) => prev + 1);
-      } catch (error) {
-        // ignore
-      } finally {
-        imageLoadingRef.current.delete(key);
-      }
-    },
-    [token]
+  const preloadItems = useMemo(
+    () =>
+      filteredItems.map((item) => ({
+        thumbnails: item.images_thumb,
+        jpgs: item.images_jpg
+      })),
+    [filteredItems]
   );
+  const selectedIndex = filteredItems.findIndex((item) => item.id === selectedId);
+  const { cacheImage, getCachedImageUrl } = useAdminImageCache({
+    token,
+    items: preloadItems,
+    selectedIndex
+  });
 
   useEffect(() => {
-    if (!token || !selectedItem) {
-      return;
-    }
-    currentThumbs.forEach((path) => {
-      void cacheImage('thumb', path);
-    });
-    currentImages.forEach((path) => {
-      void cacheImage('jpg', path);
-    });
-  }, [cacheImage, currentImages, currentThumbs, selectedItem, token]);
-
-  useEffect(() => {
-    if (!token || !selectedItem || viewerOriginalSet.size === 0) {
+    if (!token || !viewerOpen || viewerOriginalSet.size === 0) {
       return;
     }
     viewerOriginalSet.forEach((path) => {
       void cacheImage('original', path);
     });
-  }, [cacheImage, selectedItem, token, viewerOriginalSet]);
+  }, [cacheImage, token, viewerOpen, viewerOriginalSet]);
 
   const openViewer = (index: number) => {
     setViewerIndex(index);
@@ -550,11 +504,11 @@ export default function AdminMessagePage() {
   const currentDisplayUrl = cachedDisplayUrl;
 
   useEffect(() => {
-    if (!token || !currentDisplayPath) {
+    if (!token || !viewerOpen || !currentDisplayPath) {
       return;
     }
     void cacheImage(currentDisplayType, currentDisplayPath);
-  }, [cacheImage, currentDisplayPath, currentDisplayType, token]);
+  }, [cacheImage, currentDisplayPath, currentDisplayType, token, viewerOpen]);
 
   const headerText = selectedItem
     ? `${selectedItem.id}-${formatDateTime(selectedItem.created_at)}`
@@ -686,12 +640,6 @@ export default function AdminMessagePage() {
                       className={viewerDragging ? 'is-dragging' : undefined}
                       style={{
                         transform: `translate(${viewerOffset.x}px, ${viewerOffset.y}px) scale(${viewerScale})`
-                      }}
-                      onError={() => {
-                        if (!currentOriginalPath || viewerOriginalSet.has(currentOriginalPath)) {
-                          return;
-                        }
-                        setViewerOriginalSet((prev) => new Set(prev).add(currentOriginalPath));
                       }}
                     />
                   ) : (

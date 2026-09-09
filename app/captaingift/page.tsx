@@ -1,6 +1,8 @@
 'use client';
 
+import Image from 'next/image';
 import { useEffect, useMemo, useState } from 'react';
+import { buildCaptaingiftImageUrl } from '@/lib/captaingift-image';
 
 type CaptaingiftItem = {
   month: string;
@@ -13,7 +15,7 @@ type CaptaingiftResponse = {
 };
 
 export default function CaptaingiftPage() {
-  const [months, setMonths] = useState<string[]>([]);
+  const [items, setItems] = useState<CaptaingiftItem[]>([]);
   const [selectedMonth, setSelectedMonth] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
@@ -24,27 +26,24 @@ export default function CaptaingiftPage() {
     const fetchMonths = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch('https://api.harei.cn/captaingift', {
-          cache: 'no-store'
-        });
+        const response = await fetch('/api/captaingift', { cache: 'no-store' });
         if (!response.ok) {
           throw new Error('captaingift request failed');
         }
         const data = (await response.json()) as CaptaingiftResponse;
         const items = Array.isArray(data.items) ? data.items : [];
-        const sortedMonths = items
-          .map((item) => item.month)
-          .filter(Boolean)
-          .sort((a, b) => b.localeCompare(a));
+        const sortedItems = items
+          .filter((item) => item.month)
+          .sort((a, b) => b.month.localeCompare(a.month));
 
         if (isMounted) {
-          setMonths(sortedMonths);
-          setSelectedMonth(sortedMonths[0] ?? '');
+          setItems(sortedItems);
+          setSelectedMonth(sortedItems[0]?.month ?? '');
           setError(null);
         }
-      } catch (fetchError) {
+      } catch {
         if (isMounted) {
-          setMonths([]);
+          setItems([]);
           setSelectedMonth('');
           setError('数据加载失败');
         }
@@ -62,12 +61,17 @@ export default function CaptaingiftPage() {
     };
   }, []);
 
+  const months = useMemo(() => items.map((item) => item.month), [items]);
+  const selectedItem = useMemo(
+    () => items.find((item) => item.month === selectedMonth),
+    [items, selectedMonth]
+  );
   const imageUrl = useMemo(() => {
-    if (!selectedMonth) {
+    if (!selectedItem?.path) {
       return '';
     }
-    return `/api/captaingift-image?month=${selectedMonth}`;
-  }, [selectedMonth]);
+    return buildCaptaingiftImageUrl(selectedItem.path);
+  }, [selectedItem?.path]);
 
   return (
     <div className="captaingift-page">
@@ -102,11 +106,14 @@ export default function CaptaingiftPage() {
             <div className="captaingift-status">暂无内容</div>
           ) : (
             <div className="captaingift-image-wrap">
-              <img
+              <Image
                 src={imageUrl}
                 alt={`${selectedMonth} 舰礼留档`}
                 className="captaingift-image"
-                loading="lazy"
+                width={1200}
+                height={800}
+                sizes="(max-width: 640px) 90vw, 60vw"
+                unoptimized
               />
             </div>
           )}

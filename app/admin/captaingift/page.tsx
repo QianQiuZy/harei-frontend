@@ -1,7 +1,15 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import Image from 'next/image';
 import { useRouter } from 'next/navigation';
+import { useEffect, useMemo, useState } from 'react';
+import { buildCaptaingiftImageUrl } from '@/lib/captaingift-image';
+
+import {
+  CaptaingiftHeader,
+  type CaptaingiftImageStatus,
+  CaptaingiftUpload
+} from './components';
 
 type UploadResponse = {
   code?: number;
@@ -9,41 +17,20 @@ type UploadResponse = {
   message?: string;
 };
 
+type CaptaingiftItem = {
+  readonly month: string;
+  readonly path: string;
+};
+
+type CaptaingiftResponse = {
+  readonly code: number;
+  readonly items: CaptaingiftItem[];
+};
+
 const API_HOST = 'https://api.harei.cn';
 const TOKEN_KEY = 'harei-admin-token';
 const TOKEN_EXPIRES_KEY = 'harei-admin-token-expires';
-const MIN_MONTH_NUMBER = 202407;
 const SAVED_MONTH_KEY = 'harei-admin-captaingift-month';
-
-const formatMonthNumber = (value: number) => {
-  const year = Math.floor(value / 100);
-  const month = String(value % 100).padStart(2, '0');
-  return `${year}${month}`;
-};
-
-const getMonthNumber = (date: Date) => date.getFullYear() * 100 + (date.getMonth() + 1);
-
-const decrementMonth = (value: number) => {
-  const year = Math.floor(value / 100);
-  const month = value % 100;
-  if (month === 1) {
-    return (year - 1) * 100 + 12;
-  }
-  return year * 100 + (month - 1);
-};
-
-const buildMonthOptions = (startMonth: number) => {
-  const months: string[] = [];
-  let current = startMonth;
-  while (current >= MIN_MONTH_NUMBER) {
-    months.push(formatMonthNumber(current));
-    if (current === MIN_MONTH_NUMBER) {
-      break;
-    }
-    current = decrementMonth(current);
-  }
-  return months;
-};
 
 const getErrorMessage = (data: UploadResponse | null) => {
   if (!data) {
@@ -64,19 +51,17 @@ export default function AdminCaptaingiftPage() {
   const [statusMessage, setStatusMessage] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
-  const [isDragOver, setIsDragOver] = useState(false);
-  const [imageStatus, setImageStatus] = useState<'idle' | 'loading' | 'available' | 'missing' | 'error'>(
-    'idle'
+  const [isDeleting, setIsDeleting] = useState(false);
+  const [imageStatus, setImageStatus] = useState<CaptaingiftImageStatus>('idle');
+  const [archiveItems, setArchiveItems] = useState<CaptaingiftItem[]>([]);
+  const [archiveError, setArchiveError] = useState<string | null>(null);
+  const [isArchiveLoading, setIsArchiveLoading] = useState(true);
+  const [selectedMonth, setSelectedMonth] = useState('');
+  const monthOptions = useMemo(() => archiveItems.map((item) => item.month), [archiveItems]);
+  const selectedItem = useMemo(
+    () => archiveItems.find((item) => item.month === selectedMonth),
+    [archiveItems, selectedMonth]
   );
-  const fileInputRef = useRef<HTMLInputElement | null>(null);
-
-  const currentMonthNumber = useMemo(() => getMonthNumber(new Date()), []);
-  const defaultMonthNumber = useMemo(
-    () => Math.max(currentMonthNumber, MIN_MONTH_NUMBER),
-    [currentMonthNumber]
-  );
-  const monthOptions = useMemo(() => buildMonthOptions(defaultMonthNumber), [defaultMonthNumber]);
-  const [selectedMonth, setSelectedMonth] = useState(() => formatMonthNumber(defaultMonthNumber));
 
   useEffect(() => {
     const storedToken = localStorage.getItem(TOKEN_KEY);
@@ -93,17 +78,50 @@ export default function AdminCaptaingiftPage() {
   }, [router]);
 
   useEffect(() => {
-    const savedMonth = sessionStorage.getItem(SAVED_MONTH_KEY);
-    if (savedMonth && monthOptions.includes(savedMonth)) {
-      setSelectedMonth(savedMonth);
-    }
-    if (savedMonth) {
-      sessionStorage.removeItem(SAVED_MONTH_KEY);
-    }
-  }, [monthOptions]);
+    const controller = new AbortController();
+
+    const fetchArchive = async () => {
+      setIsArchiveLoading(true);
+      try {
+        const response = await fetch('/api/captaingift', {
+          cache: 'no-store',
+          signal: controller.signal
+        });
+        if (!response.ok) {
+          throw new Error(`archive request failed: ${response.status}`);
+        }
+
+        const data = (await response.json()) as CaptaingiftResponse;
+        if (data.code !== 0 || !Array.isArray(data.items)) {
+          throw new Error('archive response is invalid');
+        }
+
+        setArchiveItems(data.items);
+        const savedMonth = sessionStorage.getItem(SAVED_MONTH_KEY);
+        const nextMonth = savedMonth && data.items.some((item) => item.month === savedMonth)
+          ? savedMonth
+          : data.items[0]?.month ?? '';
+        setSelectedMonth(nextMonth);
+        sessionStorage.removeItem(SAVED_MONTH_KEY);
+        setArchiveError(null);
+      } catch {
+        if (!controller.signal.aborted) {
+          setArchiveError('舰礼留档加载失败，请稍后再试');
+        }
+      } finally {
+        if (!controller.signal.aborted) {
+          setIsArchiveLoading(false);
+        }
+      }
+    };
+
+    fetchArchive();
+    return () => controller.abort();
+  }, []);
 
   useEffect(() => {
-    if (!selectedMonth) {
+    if (!selectedItem?.path) {
+      setImageStatus('idle');
       return;
     }
 
@@ -112,7 +130,7 @@ export default function AdminCaptaingiftPage() {
     const fetchImage = async () => {
       setImageStatus('loading');
       try {
-        const response = await fetch(`/api/captaingift-image?month=${selectedMonth}`, {
+        const response = await fetch(buildCaptaingiftImageUrl(selectedItem.path), {
           cache: 'no-store',
           signal: controller.signal
         });
@@ -128,7 +146,7 @@ export default function AdminCaptaingiftPage() {
         }
 
         setImageStatus('error');
-      } catch (error) {
+      } catch {
         if (!controller.signal.aborted) {
           setImageStatus('error');
         }
@@ -140,14 +158,14 @@ export default function AdminCaptaingiftPage() {
     return () => {
       controller.abort();
     };
-  }, [selectedMonth]);
+  }, [selectedItem?.path]);
 
   const imageUrl = useMemo(() => {
-    if (!selectedMonth) {
+    if (!selectedItem?.path) {
       return '';
     }
-    return `/api/captaingift-image?month=${selectedMonth}`;
-  }, [selectedMonth]);
+    return buildCaptaingiftImageUrl(selectedItem.path);
+  }, [selectedItem?.path]);
 
   const handleFileSelection = (selectedFile: File) => {
     if (!selectedFile.type.startsWith('image/')) {
@@ -188,7 +206,7 @@ export default function AdminCaptaingiftPage() {
       let responseData: UploadResponse | null = null;
       try {
         responseData = (await response.json()) as UploadResponse;
-      } catch (error) {
+      } catch {
         responseData = null;
       }
 
@@ -202,121 +220,109 @@ export default function AdminCaptaingiftPage() {
       setTimeout(() => {
         window.location.reload();
       }, 1200);
-    } catch (error) {
+    } catch {
       setStatusMessage('上传失败，请稍后再试');
     } finally {
       setIsSubmitting(false);
     }
   };
 
+  const handleDelete = async () => {
+    if (!token || imageStatus !== 'available') {
+      return;
+    }
+
+    if (!window.confirm(`确定删除 ${selectedMonth} 的舰礼留档吗？`)) {
+      return;
+    }
+
+    setIsDeleting(true);
+    setStatusMessage('');
+
+    try {
+      const response = await fetch(`${API_HOST}/captaingift/delete`, {
+        method: 'POST',
+        headers: {
+          Authorization: `Bearer ${token}`,
+          'Content-Type': 'application/json'
+        },
+        body: JSON.stringify({ month: selectedMonth })
+      });
+
+      let responseData: UploadResponse | null = null;
+      try {
+        responseData = (await response.json()) as UploadResponse;
+      } catch {
+        responseData = null;
+      }
+
+      if (!response.ok || responseData?.code !== 0) {
+        setStatusMessage('删除失败，请稍后重试');
+        return;
+      }
+
+      setFile(null);
+      setImageStatus('missing');
+      setStatusMessage('删除成功');
+    } catch {
+      setStatusMessage('删除失败，请稍后重试');
+    } finally {
+      setIsDeleting(false);
+    }
+  };
+
   const showUpload = imageStatus === 'missing' || imageStatus === 'error';
+
+  const handleMonthChange = (month: string) => {
+    setSelectedMonth(month);
+    setFile(null);
+    setStatusMessage('');
+  };
 
   return (
     <section className="admin-page admin-captaingift-page">
       <div className="admin-captaingift-card">
-        <header className="admin-captaingift-header">
-          <div className="admin-captaingift-select-wrap">
-            <select
-              className="admin-captaingift-select"
-              value={selectedMonth}
-              onChange={(event) => {
-                setSelectedMonth(event.target.value);
-                setFile(null);
-                setStatusMessage('');
-              }}
-            >
-              {monthOptions.map((month) => (
-                <option key={month} value={month}>
-                  {month}
-                </option>
-              ))}
-            </select>
-          </div>
-          {statusMessage ? <span className="admin-captaingift-status">{statusMessage}</span> : null}
-        </header>
+        <CaptaingiftHeader
+          selectedMonth={selectedMonth}
+          monthOptions={monthOptions}
+          imageStatus={imageStatus}
+          statusMessage={statusMessage}
+          isDeleting={isDeleting}
+          isSubmitting={isSubmitting}
+          onMonthChange={handleMonthChange}
+          onDelete={handleDelete}
+        />
 
         <div className="admin-captaingift-body">
-          {imageStatus === 'loading' ? (
+          {isArchiveLoading || imageStatus === 'loading' ? (
             <div className="captaingift-status">正在加载...</div>
+          ) : archiveError ? (
+            <div className="captaingift-status is-error">{archiveError}</div>
           ) : imageStatus === 'available' ? (
             <div className="captaingift-image-wrap">
-              <img
+              <Image
                 src={imageUrl}
                 alt={`${selectedMonth} 舰礼留档`}
                 className="captaingift-image"
-                loading="lazy"
+                width={1200}
+                height={800}
+                sizes="(max-width: 640px) 90vw, 40vw"
+                unoptimized
               />
             </div>
           ) : showUpload ? (
-            <div className="admin-captaingift-upload">
+            <>
               {imageStatus === 'error' ? (
                 <div className="captaingift-status is-error">图片加载失败</div>
               ) : null}
-              <div
-                className={`box-upload${isDragOver ? ' is-dragover' : ''}${file ? ' has-files' : ''}`}
-                onDragOver={(event) => {
-                  event.preventDefault();
-                  setIsDragOver(true);
-                }}
-                onDragLeave={() => setIsDragOver(false)}
-                onDrop={(event) => {
-                  event.preventDefault();
-                  setIsDragOver(false);
-                  const droppedFile = event.dataTransfer.files[0];
-                  if (droppedFile) {
-                    handleFileSelection(droppedFile);
-                  }
-                }}
-                onClick={() => fileInputRef.current?.click()}
-                role="button"
-                tabIndex={0}
-                onKeyDown={(event) => {
-                  if (event.key === 'Enter' || event.key === ' ') {
-                    fileInputRef.current?.click();
-                  }
-                }}
-              >
-                <div className="box-upload-title">拖拽/点击上传图片(仅限1张)</div>
-                {file ? (
-                  <div className="admin-captaingift-file-row">
-                    <span className="admin-captaingift-file-name">{file.name}</span>
-                    <button
-                      type="button"
-                      className="admin-captaingift-file-remove"
-                      onClick={(event) => {
-                        event.stopPropagation();
-                        setFile(null);
-                      }}
-                    >
-                      移除
-                    </button>
-                  </div>
-                ) : (
-                  <div className="admin-captaingift-file-hint">支持常见图片格式</div>
-                )}
-                <input
-                  ref={fileInputRef}
-                  type="file"
-                  className="box-upload-input"
-                  accept="image/*"
-                  onChange={(event) => {
-                    const selectedFile = event.target.files?.[0];
-                    if (selectedFile) {
-                      handleFileSelection(selectedFile);
-                    }
-                    event.target.value = '';
-                  }}
-                />
-              </div>
-              <button
-                type="button"
-                className="admin-captaingift-submit"
-                onClick={handleSubmit}
-                disabled={isSubmitting}
-              >
-                提交
-              </button>
-            </div>
+              <CaptaingiftUpload
+                file={file}
+                isSubmitting={isSubmitting}
+                onFileSelection={handleFileSelection}
+                onFileRemove={() => setFile(null)}
+                onSubmit={handleSubmit}
+              />
+            </>
           ) : (
             <div className="captaingift-status">暂无内容</div>
           )}

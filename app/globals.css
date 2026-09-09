@@ -2020,6 +2020,7 @@ a {
 
 .admin-captaingift-page {
   align-items: flex-start;
+  font-family: 'Noto Sans SC Variable', 'Source Han Sans SC', 'Microsoft YaHei', system-ui, sans-serif;
 }
 
 .admin-captaingift-card {
@@ -2036,9 +2037,17 @@ a {
 
 .admin-captaingift-header {
   display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  gap: 16px;
+}
+
+.admin-captaingift-month-row {
+  display: flex;
   align-items: center;
   justify-content: space-between;
   gap: 16px;
+  width: 100%;
 }
 
 .admin-captaingift-select-wrap {
@@ -2054,6 +2063,37 @@ a {
   background: #ffffff;
   font-size: 14px;
   color: #111827;
+}
+
+.admin-captaingift-delete {
+  min-height: 42px;
+  margin-left: auto;
+  border: 1px solid color-mix(in srgb, var(--music-error) 32%, white);
+  border-radius: 12px;
+  padding: 10px 16px;
+  background: color-mix(in srgb, var(--music-error) 8%, white);
+  color: var(--music-error);
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  transition: background 160ms ease-out, border-color 160ms ease-out, transform 160ms ease-out;
+}
+
+.admin-captaingift-delete:hover {
+  border-color: var(--music-error);
+  background: color-mix(in srgb, var(--music-error) 14%, white);
+  transform: translateY(-1px);
+}
+
+.admin-captaingift-delete:focus-visible {
+  outline: 2px solid var(--music-coral);
+  outline-offset: 2px;
+}
+
+.admin-captaingift-delete:disabled {
+  cursor: not-allowed;
+  opacity: 0.6;
+  transform: none;
 }
 
 .admin-captaingift-status {
@@ -2074,6 +2114,25 @@ a {
   display: flex;
   flex-direction: column;
   gap: 16px;
+}
+
+.admin-captaingift-upload-trigger {
+  display: flex;
+  width: 100%;
+  flex-direction: column;
+  align-items: center;
+  gap: 12px;
+  border: none;
+  padding: 0;
+  background: transparent;
+  color: inherit;
+  font: inherit;
+  cursor: pointer;
+}
+
+.admin-captaingift-upload-trigger:focus-visible {
+  outline: 2px solid var(--music-coral);
+  outline-offset: 4px;
 }
 
 .admin-captaingift-file-row {
@@ -2365,6 +2424,17 @@ a {
     padding: 20px;
   }
 
+  .admin-captaingift-card {
+    width: 90%;
+    padding: 20px;
+  }
+
+  .admin-captaingift-select-wrap {
+    flex: 1;
+    width: auto;
+    min-width: 0;
+  }
+
   .about-card {
     width: 90%;
     padding: 20px;
@@ -2425,7 +2495,4 @@ a {
     width: 96px;
   }
 
-  .captaingift-select-wrap {
-    width: 100%;
-  }
 }
