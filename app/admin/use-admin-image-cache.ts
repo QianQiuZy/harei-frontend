@@ -27,8 +27,10 @@ type UseAdminImageCacheOptions = {
   readonly selectedIndex: number;
 };
 
-const buildImageUrl = (type: AdminImageType, path: string) =>
-  `/api/admin-image?type=${type}&path=${encodeURIComponent(path)}`;
+export const buildAdminImageUrl = (type: AdminImageType, path: string) => {
+  const filename = path.split(/[\\/]/).pop() ?? '';
+  return `/api/admin-image/${type}/${encodeURIComponent(filename)}`;
+};
 
 const getCacheKey = (type: AdminImageType, path: string) => `${type}:${path}`;
 
@@ -91,7 +93,7 @@ export function useAdminImageCache({
 
       const request = (async () => {
         try {
-          const response = await fetch(buildImageUrl(type, path), {
+          const response = await fetch(buildAdminImageUrl(type, path), {
             headers: {
               Authorization: `Bearer ${token}`
             },

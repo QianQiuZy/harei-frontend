@@ -3,31 +3,42 @@ import { NextResponse } from 'next/server';
 const API_HOST = 'http://127.0.0.1:6555';
 const CACHE_CONTROL_OK = 'private, max-age=31536000, immutable';
 
-const TYPE_MAP: Record<string, string> = {
+const TYPE_MAP = {
   thumb: 'thumb',
   jpg: 'jpg',
-  original: 'original',
-};
+  original: 'original'
+} as const;
 
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const type = searchParams.get('type');
-  const path = searchParams.get('path');
+type AdminImageType = keyof typeof TYPE_MAP;
+
+const isAdminImageType = (value: string): value is AdminImageType =>
+  Object.keys(TYPE_MAP).includes(value);
+
+const isSafeFilename = (filename: string) =>
+  filename.length > 0 && filename !== '.' && filename !== '..' && !filename.includes('/') && !filename.includes('\\');
+
+export async function GET(
+  request: Request,
+  { params }: { params: Promise<{ type: string; filename: string }> }
+) {
+  const { type, filename } = await params;
   const authHeader = request.headers.get('authorization') ?? '';
   const token = authHeader.startsWith('Bearer ') ? authHeader.slice(7) : '';
 
-  if (!type || !path || !token || !TYPE_MAP[type]) {
+  if (!isAdminImageType(type) || !isSafeFilename(filename) || !token) {
     return NextResponse.json({ error: 'invalid request' }, { status: 400 });
   }
 
-  const targetUrl = `${API_HOST}/box/image/${TYPE_MAP[type]}?path=${encodeURIComponent(path)}`;
+  const backendType = TYPE_MAP[type];
+  const imagePath = `uploads/${backendType === 'thumb' ? 'thumbs' : backendType}/${filename}`;
+  const targetUrl = `${API_HOST}/box/image/${backendType}?path=${encodeURIComponent(imagePath)}`;
 
   try {
     const response = await fetch(targetUrl, {
       cache: 'no-store',
       headers: {
-        Authorization: `Bearer ${token}`,
-      },
+        Authorization: `Bearer ${token}`
+      }
     });
 
     const headers = new Headers();
@@ -38,7 +49,7 @@ export async function GET(request: Request) {
 
     return new NextResponse(response.body, {
       status: response.status,
-      headers,
+      headers
     });
   } catch {
     return NextResponse.json({ error: 'proxy failed' }, { status: 502 });

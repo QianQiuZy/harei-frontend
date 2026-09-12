@@ -2,8 +2,17 @@ import { describe, expect, it } from 'vitest';
 import {
   type AdminImagePreloadItem,
   type AdminImagePreloadLoader,
+  buildAdminImageUrl,
   preloadAdminImages
 } from './use-admin-image-cache';
+
+describe('admin image URLs', () => {
+  it('uses a pathname filename instead of query parameters', () => {
+    expect(buildAdminImageUrl('thumb', 'uploads/thumbs/42-thumb.jpg')).toBe(
+      '/api/admin-image/thumb/42-thumb.jpg'
+    );
+  });
+});
 
 describe('admin image preload order', () => {
   it('loads the selected item and only the next two items in thumbnail-first stages', async () => {

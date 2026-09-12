@@ -1,4 +1,4 @@
 export const buildCaptaingiftImageUrl = (path: string) => {
-  const params = new URLSearchParams({ path });
-  return `/api/captaingift-image?${params.toString()}`;
+  const filename = path.split(/[\\/]/).pop() ?? '';
+  return `/api/captaingift-image/${encodeURIComponent(filename)}`;
 };

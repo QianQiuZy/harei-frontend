@@ -2,6 +2,7 @@
 
 import Image from 'next/image';
 import { useEffect, useMemo, useState } from 'react';
+import { API_BASE_URL } from '@/lib/api';
 import { buildCaptaingiftImageUrl } from '@/lib/captaingift-image';
 
 type CaptaingiftItem = {
@@ -26,7 +27,7 @@ export default function CaptaingiftPage() {
     const fetchMonths = async () => {
       try {
         setIsLoading(true);
-        const response = await fetch('/api/captaingift', { cache: 'no-store' });
+        const response = await fetch(`${API_BASE_URL}/captaingift`, { cache: 'no-store' });
         if (!response.ok) {
           throw new Error('captaingift request failed');
         }

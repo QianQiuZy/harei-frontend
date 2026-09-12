@@ -3,26 +3,30 @@ import { NextResponse } from 'next/server';
 const API_HOST = 'http://127.0.0.1:6555';
 const CACHE_CONTROL_OK = 'public, max-age=31536000, immutable';
 
+const isSafeFilename = (filename: string) =>
+  filename.length > 0 && filename !== '.' && filename !== '..' && !filename.includes('/') && !filename.includes('\\');
+
 const withCorsHeaders = (headers: Headers) => {
   headers.set('Access-Control-Allow-Origin', '*');
   headers.set('Access-Control-Allow-Methods', 'GET, OPTIONS');
 };
 
-export async function GET(request: Request) {
-  const { searchParams } = new URL(request.url);
-  const path = searchParams.get('path');
-
+export async function GET(
+  _request: Request,
+  { params }: { params: Promise<{ filename: string }> }
+) {
+  const { filename } = await params;
   const headers = new Headers();
   withCorsHeaders(headers);
 
-  if (!path) {
+  if (!isSafeFilename(filename)) {
     return NextResponse.json({ error: 'invalid request' }, { status: 400, headers });
   }
 
-  const targetUrl = `${API_HOST}/captaingift/image?path=${encodeURIComponent(path)}`;
+  const imagePath = `uploads/captaingift/${filename}`;
+  const targetUrl = `${API_HOST}/captaingift/image?path=${encodeURIComponent(imagePath)}`;
 
   try {
-    // 保持 no-store：避免 Next 自己的 fetch cache；真正缓存交给 Nginx/浏览器
     const response = await fetch(targetUrl, { cache: 'no-store' });
 
     const contentType = response.headers.get('content-type');

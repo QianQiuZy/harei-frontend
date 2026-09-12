@@ -21,7 +21,6 @@
   --music-warning: #a76700;
   --music-error: #b4233c;
   color-scheme: light;
-  /*font-family: 'Noto Sans SC Variable', 'Source Han Sans SC', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;*/
   font-family: 'JinzisheZhenhao', 'PingFang SC', 'Microsoft YaHei', system-ui, sans-serif;
   background-color: #0f172a;
   color: #1f2937;
@@ -2020,7 +2019,6 @@ a {
 
 .admin-captaingift-page {
   align-items: flex-start;
-  font-family: 'Noto Sans SC Variable', 'Source Han Sans SC', 'Microsoft YaHei', system-ui, sans-serif;
 }
 
 .admin-captaingift-card {

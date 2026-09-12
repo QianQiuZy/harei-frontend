@@ -325,7 +325,7 @@
 }
 ```
 
-### GET `/captaingift/image?month=YYYYMM`（无需 Token）
+### GET `/captaingift/image?path=uploads/captaingift/YYYYMM_<sha256>.jpg`（无需 Token）
 **响应**：图片文件
 
 ### POST `/captaingift/add`（需要 Token）
