@@ -1,6 +1,5 @@
 import { NextResponse } from 'next/server';
-
-const API_HOST = 'http://127.0.0.1:6555';
+import { SERVER_API_BASE_URL } from '@/lib/server-api';
 
 export async function GET(request: Request) {
   const { searchParams } = new URL(request.url);
@@ -10,7 +9,7 @@ export async function GET(request: Request) {
     return NextResponse.json({ error: 'invalid request' }, { status: 400 });
   }
 
-  const targetUrl = `${API_HOST}/download/file?download_id=${encodeURIComponent(downloadId)}`;
+  const targetUrl = `${SERVER_API_BASE_URL}/download/file?download_id=${encodeURIComponent(downloadId)}`;
 
   try {
     const response = await fetch(targetUrl, { cache: 'no-store' });

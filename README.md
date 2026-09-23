@@ -44,6 +44,8 @@ npm run start
 ## 接口与数据
 - 后端接口清单：`api.md`
 - 当前页面直接请求 `https://api.harei.cn`（无额外环境变量配置）
+- 浏览器端 API 客户端使用 `NEXT_PUBLIC_API_BASE_URL`（默认 `https://api.harei.cn`）；不要将其设为 `127.0.0.1`，因为浏览器中的 loopback 指向访客自己的设备。
+- Next.js 服务端 API 代理使用 `HAREI_BACKEND_API_URL`（默认 `http://127.0.0.1:6555`）直连同机后端。只有 Next.js 与后端部署在同一台主机时使用默认值；分开部署时在 Next.js 服务端环境中设置该地址，不要加 `NEXT_PUBLIC_` 前缀。
 
 ## 其他说明
 - 项目主要页面位于 `app/` 目录下，各页面以文件夹路由组织。

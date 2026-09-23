@@ -1052,7 +1052,6 @@ a {
 .box-input {
   width: 100%;
   min-height: 160px;
-  resize: none;
   border-radius: 12px;
   border: 1px solid #e5e7eb;
   padding: 12px 14px;
@@ -1060,6 +1059,33 @@ a {
   color: #111827;
   background: #ffffff;
   grid-area: input;
+}
+
+.box-rich-input {
+  overflow-y: auto;
+  white-space: pre-wrap;
+  overflow-wrap: anywhere;
+  line-height: 1.6;
+  cursor: text;
+}
+
+.box-rich-input:focus-visible {
+  border-color: #6366f1;
+  outline: 2px solid rgba(99, 102, 241, 0.22);
+  outline-offset: 1px;
+}
+
+.box-rich-input[data-empty='true']::before {
+  content: attr(data-placeholder);
+  color: #9ca3af;
+  pointer-events: none;
+}
+
+.box-emoji-token {
+  display: inline-block;
+  white-space: nowrap;
+  vertical-align: middle;
+  user-select: all;
 }
 
 .box-hint-row {
@@ -1071,6 +1097,176 @@ a {
   color: #6b7280;
   width: 100%;
   grid-area: hint;
+}
+
+.box-hint-actions {
+  display: inline-flex;
+  align-items: center;
+  gap: 14px;
+}
+
+.box-emoji-picker {
+  position: static;
+}
+
+.box-emoji-trigger,
+.box-emoji-panel-close {
+  width: 36px;
+  height: 36px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  border: 1px solid #d1d5db;
+  border-radius: 10px;
+  color: #374151;
+  background: #ffffff;
+  cursor: pointer;
+}
+
+.box-emoji-trigger:hover,
+.box-emoji-trigger[aria-expanded='true'] {
+  color: #4f46e5;
+  border-color: #a5b4fc;
+  background: #eef2ff;
+}
+
+.box-emoji-trigger:focus-visible,
+.box-emoji-option:focus-visible,
+.box-emoji-panel-close:focus-visible {
+  outline: 2px solid #6366f1;
+  outline-offset: 2px;
+}
+
+.box-emoji-panel {
+  position: fixed;
+  z-index: 20;
+  display: flex;
+  flex-direction: column;
+  width: min(360px, calc(100vw - 40px));
+  max-height: min(420px, 70vh);
+  overflow: hidden;
+  padding: 12px;
+  border: 1px solid #d1d5db;
+  border-radius: 14px;
+  background: #ffffff;
+  box-shadow: 0 12px 30px rgba(15, 23, 42, 0.2);
+}
+
+.box-emoji-panel-header {
+  flex: 0 0 auto;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  margin: -12px -12px 10px;
+  padding: 10px 12px;
+  border-bottom: 1px solid #e5e7eb;
+  color: #111827;
+  background: #ffffff;
+  font-size: 14px;
+  font-weight: 600;
+}
+
+.box-emoji-panel-close {
+  width: 30px;
+  height: 30px;
+  flex: 0 0 auto;
+  margin-left: auto;
+  border: 0;
+}
+
+.box-emoji-group-tabs {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  gap: 8px;
+  padding: 2px;
+  overflow-x: auto;
+}
+
+.box-emoji-group-tab {
+  flex: 0 0 auto;
+  width: 44px;
+  height: 44px;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  padding: 3px;
+  border: 1px solid transparent;
+  border-radius: 10px;
+  background: #f9fafb;
+  cursor: pointer;
+}
+
+.box-emoji-group-tab img {
+  width: 36px;
+  height: 36px;
+  object-fit: contain;
+}
+
+.box-emoji-group-tab:hover,
+.box-emoji-group-tab.is-active {
+  border-color: #a5b4fc;
+  background: #eef2ff;
+}
+
+.box-emoji-options {
+  flex: 1 1 auto;
+  min-height: 0;
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  align-content: start;
+  gap: 6px;
+  overflow-y: auto;
+}
+
+.box-emoji-option {
+  min-width: 0;
+  min-height: 76px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 4px;
+  padding: 6px 4px;
+  border: 1px solid transparent;
+  border-radius: 9px;
+  color: #374151;
+  background: #f9fafb;
+  cursor: pointer;
+}
+
+.box-emoji-option:hover {
+  border-color: #c7d2fe;
+  background: #eef2ff;
+}
+
+.box-emoji-option img {
+  width: 44px;
+  height: 42px;
+  object-fit: contain;
+}
+
+.box-emoji-option span {
+  max-width: 100%;
+  overflow: hidden;
+  font-size: 11px;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
+
+.box-emoji-empty {
+  margin: 12px 0;
+  color: #6b7280;
+  font-size: 13px;
+}
+
+.box-emoji {
+  display: inline-block;
+  width: auto;
+  height: 1.8em;
+  max-width: 3.5em;
+  object-fit: contain;
+  vertical-align: middle;
 }
 
 .box-checkbox {
@@ -1597,6 +1793,14 @@ a {
 .admin-message-mask:hover {
   color: #ffffff;
   background-color: #111827;
+}
+
+.admin-message-mask .box-emoji {
+  visibility: hidden;
+}
+
+.admin-message-mask:hover .box-emoji {
+  visibility: visible;
 }
 
 .admin-message-bv-link {

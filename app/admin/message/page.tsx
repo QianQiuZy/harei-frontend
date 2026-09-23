@@ -2,7 +2,9 @@
 
 import { useRouter } from 'next/navigation';
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { BoxMessage } from '@/components/box/BoxMessage';
 import { useAdminImageCache } from '../use-admin-image-cache';
+import { useEmojiGroups } from '@/lib/box/use-emoji-groups';
 
 type BoxItem = {
   id: number;
@@ -50,79 +52,6 @@ const formatDateTime = (value: string) => {
   return `${year}-${month}-${day} ${hours}:${minutes}:${seconds}`;
 };
 
-const renderBvLinks = (text: string, keyPrefix: string) => {
-  if (!text) {
-    return null;
-  }
-  const regex = /BV[0-9A-Za-z]{10}/g;
-  if (!regex.test(text)) {
-    return text;
-  }
-  regex.lastIndex = 0;
-  const nodes: React.ReactNode[] = [];
-  let lastIndex = 0;
-  let match = regex.exec(text);
-  while (match) {
-    if (match.index > lastIndex) {
-      nodes.push(text.slice(lastIndex, match.index));
-    }
-    const bv = match[0];
-    nodes.push(
-      <a
-        key={`${keyPrefix}-bv-${match.index}`}
-        className="admin-message-bv-link"
-        href={`https://www.bilibili.com/video/${bv}`}
-        target="_blank"
-        rel="noreferrer"
-      >
-        {bv}
-      </a>
-    );
-    lastIndex = match.index + bv.length;
-    match = regex.exec(text);
-  }
-  if (lastIndex < text.length) {
-    nodes.push(text.slice(lastIndex));
-  }
-  return nodes;
-};
-
-const renderMaskedMessage = (message: string) => {
-  const appendNodes = (target: React.ReactNode[], content: React.ReactNode | React.ReactNode[]) => {
-    if (Array.isArray(content)) {
-      target.push(...content);
-      return;
-    }
-    if (content !== null && content !== undefined) {
-      target.push(content);
-    }
-  };
-
-  if (!message.includes('{{')) {
-    return renderBvLinks(message, 'plain');
-  }
-  const nodes: React.ReactNode[] = [];
-  const regex = /{{([\s\S]*?)}}/g;
-  let lastIndex = 0;
-  let match = regex.exec(message);
-  while (match) {
-    if (match.index > lastIndex) {
-      appendNodes(nodes, renderBvLinks(message.slice(lastIndex, match.index), `plain-${lastIndex}`));
-    }
-    nodes.push(
-      <span key={`${match.index}-${match[1]}`} className="admin-message-mask">
-        {renderBvLinks(match[1], `mask-${match.index}`)}
-      </span>
-    );
-    lastIndex = match.index + match[0].length;
-    match = regex.exec(message);
-  }
-  if (lastIndex < message.length) {
-    appendNodes(nodes, renderBvLinks(message.slice(lastIndex), `plain-${lastIndex}`));
-  }
-  return nodes;
-};
-
 export default function AdminMessagePage() {
   const router = useRouter();
   const [token, setToken] = useState<string | null>(null);
@@ -132,6 +61,7 @@ export default function AdminMessagePage() {
   const [statusMessage, setStatusMessage] = useState<string>('');
   const [isLoading, setIsLoading] = useState<boolean>(true);
   const [selectedTag, setSelectedTag] = useState<string>('');
+  const { files: emojiFiles, groups: emojiGroups } = useEmojiGroups();
 
   const [viewerOpen, setViewerOpen] = useState(false);
   const [viewerIndex, setViewerIndex] = useState(0);
@@ -572,7 +502,7 @@ export default function AdminMessagePage() {
               <div className="admin-message-detail-header">{headerText}</div>
               {selectedItem ? (
                 <div className="admin-message-content">
-                  {renderMaskedMessage(selectedItem.msg)}
+                  <BoxMessage files={emojiFiles} message={selectedItem.msg} emojiGroups={emojiGroups} />
                 </div>
               ) : (
                 <div className="admin-message-content">请选择左侧留言</div>

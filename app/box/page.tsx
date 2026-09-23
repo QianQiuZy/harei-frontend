@@ -1,6 +1,9 @@
 'use client';
 
 import { useEffect, useMemo, useRef, useState } from 'react';
+import { BoxEmojiEditor, type BoxEmojiEditorHandle } from '@/components/box/BoxEmojiEditor';
+import { EmojiPicker } from '@/components/box/EmojiPicker';
+import { useEmojiGroups } from '@/lib/box/use-emoji-groups';
 
 type TagResponse = {
   code: number;
@@ -56,8 +59,10 @@ export default function BoxPage() {
   const [inputError, setInputError] = useState(false);
   const [tagError, setTagError] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
+  const { files: emojiFiles, group_icons: emojiGroupIcons, groups: emojiGroups } = useEmojiGroups();
 
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const messageEditorRef = useRef<BoxEmojiEditorHandle | null>(null);
   const alertTimerRef = useRef<NodeJS.Timeout | null>(null);
   const resultTimerRef = useRef<NodeJS.Timeout | null>(null);
   const inputErrorTimerRef = useRef<NodeJS.Timeout | null>(null);
@@ -314,29 +319,39 @@ export default function BoxPage() {
               ))}
             </select>
           </label>
-          <textarea
-            className={`box-input${inputError ? ' is-error' : ''}`}
-            placeholder="写下你的提问..."
-            value={message}
-            onChange={(event) => setMessage(event.target.value)}
-            rows={5}
+          <BoxEmojiEditor
+            ref={messageEditorRef}
+            files={emojiFiles}
+            emojiGroups={emojiGroups}
+            isError={inputError}
+            onChange={setMessage}
           />
           <div className="box-hint-row">
             <span>{'隐藏内容编写格式：{{这是隐藏内容}}'}</span>
-            <label className="box-checkbox">
-              <input
-                type="checkbox"
-                checked={includeImage}
-                onChange={(event) => {
-                  const checked = event.target.checked;
-                  setIncludeImage(checked);
-                  if (!checked) {
-                    setFiles([]);
-                  }
-                }}
+            <div className="box-hint-actions">
+              <EmojiPicker
+                files={emojiFiles}
+                groups={emojiGroups}
+                groupIcons={emojiGroupIcons}
+                onSelect={(groupName, emojiName) =>
+                  messageEditorRef.current?.insertEmoji(groupName, emojiName)
+                }
               />
-              是否附图
-            </label>
+              <label className="box-checkbox">
+                <input
+                  type="checkbox"
+                  checked={includeImage}
+                  onChange={(event) => {
+                    const checked = event.target.checked;
+                    setIncludeImage(checked);
+                    if (!checked) {
+                      setFiles([]);
+                    }
+                  }}
+                />
+                是否附图
+              </label>
+            </div>
           </div>
           {includeImage && (
             <div

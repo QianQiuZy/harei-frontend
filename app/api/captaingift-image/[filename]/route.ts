@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
+import { SERVER_API_BASE_URL } from '@/lib/server-api';
 
-const API_HOST = 'http://127.0.0.1:6555';
 const CACHE_CONTROL_OK = 'public, max-age=31536000, immutable';
 
 const isSafeFilename = (filename: string) =>
@@ -24,7 +24,7 @@ export async function GET(
   }
 
   const imagePath = `uploads/captaingift/${filename}`;
-  const targetUrl = `${API_HOST}/captaingift/image?path=${encodeURIComponent(imagePath)}`;
+  const targetUrl = `${SERVER_API_BASE_URL}/captaingift/image?path=${encodeURIComponent(imagePath)}`;
 
   try {
     const response = await fetch(targetUrl, { cache: 'no-store' });

@@ -1,6 +1,6 @@
 import { NextResponse } from 'next/server';
+import { SERVER_API_BASE_URL } from '@/lib/server-api';
 
-const API_HOST = 'http://127.0.0.1:6555';
 const CACHE_CONTROL_OK = 'private, max-age=31536000, immutable';
 
 const TYPE_MAP = {
@@ -31,7 +31,7 @@ export async function GET(
 
   const backendType = TYPE_MAP[type];
   const imagePath = `uploads/${backendType === 'thumb' ? 'thumbs' : backendType}/${filename}`;
-  const targetUrl = `${API_HOST}/box/image/${backendType}?path=${encodeURIComponent(imagePath)}`;
+  const targetUrl = `${SERVER_API_BASE_URL}/box/image/${backendType}?path=${encodeURIComponent(imagePath)}`;
 
   try {
     const response = await fetch(targetUrl, {
