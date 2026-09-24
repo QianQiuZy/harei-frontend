@@ -1777,6 +1777,12 @@ a {
   line-height: 1.6;
 }
 
+.admin-message-content .box-emoji {
+  width: 3em;
+  height: 3em;
+  max-width: 3em;
+}
+
 .admin-message-mask {
   display: inline;
   background: #111827;
