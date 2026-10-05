@@ -35,23 +35,23 @@
 
 .hero { padding: 36px 32px 16px; }
 .hero p { margin: 0 0 8px; color: var(--music-coral-dark); font-size: 10px; font-weight: 800; letter-spacing: 0.18em; }
-.hero h2 { max-width: calc(100% - 48px); margin: 0; font-family: "Noto Serif SC Variable", serif; font-size: clamp(2rem, 5vw, 2.65rem); line-height: 1.2; }
-.hero span { display: block; margin-top: 10px; color: var(--music-muted); font-family: "Noto Serif SC Variable", serif; }
+.hero h2 { max-width: calc(100% - 48px); margin: 0; font-family: inherit; font-size: clamp(2rem, 5vw, 2.65rem); line-height: 1.2; }
+.hero span { display: block; margin-top: 10px; color: var(--music-muted); font-family: inherit; }
 .body { padding: 6px 32px 32px; }
 .tags { display: flex; flex-wrap: wrap; gap: 7px; margin: 0; padding: 0 0 18px; border-bottom: 1px solid var(--music-line); list-style: none; }
 .tags li { padding: 5px 11px; color: var(--music-muted); background: var(--music-paper); border: 1px solid var(--music-line); border-radius: 999px; font-size: 11px; font-weight: 700; }
 .notes { padding: 12px 16px; color: var(--music-muted); background: color-mix(in srgb, var(--music-lemon) 16%, transparent); border-left: 3px solid var(--music-lemon); border-radius: 8px; font-size: 13px; }
 .historyHeading { display: flex; align-items: end; justify-content: space-between; margin: 20px 0 12px; }
-.historyHeading h3 { margin: 0; font-family: "Noto Serif SC Variable", serif; font-size: 22px; }
+.historyHeading h3 { margin: 0; font-family: inherit; font-size: 22px; }
 .historyHeading p { margin: 0; color: var(--music-muted); font-size: 11px; }
 .historyList { display: grid; gap: 8px; margin: 0; padding: 0; list-style: none; }
 .historyItem { min-height: 64px; display: grid; grid-template-columns: 56px minmax(0, 1fr) auto; gap: 14px; align-items: center; padding: 9px 11px; background: var(--music-paper); border: 1px solid var(--music-line); border-radius: 12px; }
-.historyItem time { font-family: "Noto Serif SC Variable", serif; font-size: 11px; text-align: center; }
+.historyItem time { font-family: inherit; font-size: 11px; text-align: center; }
 .historyItem time strong { display: block; color: var(--music-coral-dark); font-size: 16px; }
 .historyItem div { min-width: 0; }
 .historyItem div strong,
 .historyItem div span { display: block; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
-.historyItem div strong { font-family: "Noto Serif SC Variable", serif; font-size: 12px; }
+.historyItem div strong { font-family: inherit; font-size: 12px; }
 .historyItem div span { margin-top: 3px; color: var(--music-muted); font-size: 10px; }
 .historyItem a { min-height: 42px; display: inline-flex; align-items: center; gap: 6px; padding: 7px 10px; color: var(--music-surface); background: var(--music-ink); border-radius: 8px; font-size: 11px; font-weight: 700; text-decoration: none; }
 .historyItem a:hover { color: var(--music-ink); background: var(--music-lemon); }

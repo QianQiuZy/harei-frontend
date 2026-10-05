@@ -1,5 +1,3 @@
-import '@fontsource-variable/noto-sans-sc';
-import '@fontsource-variable/noto-serif-sc';
 import './globals.css';
 import type { Metadata } from 'next';
 import type { ReactNode } from 'react';

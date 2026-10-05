@@ -35,9 +35,8 @@ Colors outside this table are not introduced by music components. Existing non-m
 | Body small | `0.875rem` | 400 | 1.5 | Metadata |
 | Caption | `0.75rem` | 700 | 1.4 | Labels and overlines |
 
-- Sans: self-hosted `"Noto Sans SC Variable"`, then `"Source Han Sans SC", "Microsoft YaHei", sans-serif`
-- Serif: self-hosted `"Noto Serif SC Variable"`, then `"Source Han Serif SC", "Songti SC", SimSun, serif`
-- Serif is reserved for song titles and editorial headings.
+- Public catalog and management pages inherit the global `"JinzisheZhenhao", "PingFang SC", "Microsoft YaHei", system-ui, sans-serif` font stack from `app/globals.css`.
+- Headings, song titles, artist metadata, statistics, filters, dialogs, performance history, login, forms, and audit details all use this shared stack; music surfaces do not override it with separate sans/serif fonts.
 
 ## 4. Spacing & Layout
 
