@@ -46,13 +46,27 @@ const ALLOWED_IMAGE_MIME_TYPES = new Set([
 const ACCEPT_IMAGE_EXTENSIONS = ALLOWED_IMAGE_EXTENSIONS.map((ext) => `.${ext}`).join(',');
 const IMAGE_FORMAT_HINT = ALLOWED_IMAGE_EXTENSIONS.map((ext) => `.${ext}`).join('/');
 
+function ImagePreview({ file, index }: { file: File; index: number }) {
+  const imageRef = useRef<HTMLImageElement | null>(null);
+  useEffect(() => {
+    const image = imageRef.current;
+    if (!image) return;
+    const url = URL.createObjectURL(file);
+    image.src = url;
+    return () => {
+      image.removeAttribute('src');
+      URL.revokeObjectURL(url);
+    };
+  }, [file]);
+  return <img ref={imageRef} alt={`已选择图片${index + 1}`} />;
+}
+
 export default function BoxPage() {
   const [tags, setTags] = useState<string[]>([]);
   const [selectedTag, setSelectedTag] = useState('');
   const [message, setMessage] = useState('');
   const [includeImage, setIncludeImage] = useState(false);
   const [files, setFiles] = useState<File[]>([]);
-  const [previewUrls, setPreviewUrls] = useState<string[]>([]);
   const [isUploading, setIsUploading] = useState(false);
   const [alertMessage, setAlertMessage] = useState<string | null>(null);
   const [resultMessage, setResultMessage] = useState<string | null>(null);
@@ -118,15 +132,6 @@ export default function BoxPage() {
     () => files.reduce((sum, file) => sum + file.size, 0),
     [files]
   );
-
-  useEffect(() => {
-    const nextUrls = files.map((file) => URL.createObjectURL(file));
-    setPreviewUrls(nextUrls);
-
-    return () => {
-      nextUrls.forEach((url) => URL.revokeObjectURL(url));
-    };
-  }, [files]);
 
   const showAlert = (text: string) => {
     setAlertMessage(text);
@@ -356,7 +361,7 @@ export default function BoxPage() {
           {includeImage && (
             <div
               className={`box-upload${isDragOver ? ' is-dragover' : ''}${
-                previewUrls.length > 0 ? ' has-files' : ''
+                files.length > 0 ? ' has-files' : ''
               }`}
               onDragOver={(event) => {
                 event.preventDefault();
@@ -376,12 +381,12 @@ export default function BoxPage() {
               <div className="box-upload-title">
                 拖拽/点击添加图片
               </div>
-              {previewUrls.length > 0 && (
+              {files.length > 0 && (
                 <div className="box-upload-thumbs">
-                  {previewUrls.map((url, index) => (
-                    <div className="box-upload-thumb" key={url}>
+                  {files.map((file, index) => (
+                    <div className="box-upload-thumb" key={`${file.name}:${file.lastModified}:${index}`}>
                       <div className="box-upload-thumb-image">
-                        <img src={url} alt={`已选择图片${index + 1}`} />
+                        <ImagePreview file={file} index={index} />
                       </div>
                       <button
                         type="button"

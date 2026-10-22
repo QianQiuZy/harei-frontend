@@ -1,7 +1,8 @@
 'use client';
 
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useLegacyAdminToken } from '@/lib/auth/useLegacyAdminToken';
 
 type TagResponse = {
   code: number;
@@ -14,56 +15,40 @@ type MessageResponse = {
 };
 
 const API_HOST = 'https://api.harei.cn';
-const TOKEN_KEY = 'harei-admin-token';
-const TOKEN_EXPIRES_KEY = 'harei-admin-token-expires';
+
+const fetchTags = async () => {
+  const response = await fetch(`${API_HOST}/tag/active`);
+  if (!response.ok) throw new Error('fetch failed');
+  const data = (await response.json()) as TagResponse;
+  if (data.code !== 0) throw new Error('fetch failed');
+  return data.items ?? [];
+};
 
 export default function AdminTagPage() {
   const router = useRouter();
-  const [token, setToken] = useState<string | null>(null);
+  const token = useLegacyAdminToken();
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
   const [statusMessage, setStatusMessage] = useState('');
   const [isLoading, setIsLoading] = useState(true);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
-  useEffect(() => {
-    const storedToken = localStorage.getItem(TOKEN_KEY);
-    const expiresAt = Number(localStorage.getItem(TOKEN_EXPIRES_KEY));
-
-    if (!storedToken || !expiresAt || Number.isNaN(expiresAt) || Date.now() > expiresAt) {
-      localStorage.removeItem(TOKEN_KEY);
-      localStorage.removeItem(TOKEN_EXPIRES_KEY);
-      router.replace('/login');
-      return;
-    }
-
-    setToken(storedToken);
-  }, [router]);
-
-  const fetchTags = useCallback(async (withLoading = true) => {
-    if (withLoading) {
-      setIsLoading(true);
-    }
+  const refreshTags = async () => {
     try {
-      const response = await fetch(`${API_HOST}/tag/active`);
-      if (!response.ok) {
-        throw new Error('fetch failed');
-      }
-      const data = (await response.json()) as TagResponse;
-      if (data.code !== 0) {
-        throw new Error('fetch failed');
-      }
-      setTags(data.items ?? []);
+      setTags(await fetchTags());
     } catch (error) {
       setTags([]);
-    } finally {
-      setIsLoading(false);
     }
-  }, []);
+  };
 
   useEffect(() => {
-    fetchTags();
-  }, [fetchTags]);
+    let active = true;
+    void fetchTags()
+      .then((items) => { if (active) setTags(items); })
+      .catch(() => { if (active) setTags([]); })
+      .finally(() => { if (active) setIsLoading(false); });
+    return () => { active = false; };
+  }, []);
 
   const handleAdd = async () => {
     const tagName = tagInput.trim();
@@ -95,7 +80,7 @@ export default function AdminTagPage() {
       }
       setStatusMessage(data.message || '添加成功');
       setTagInput('');
-      await fetchTags(false);
+      await refreshTags();
     } catch (error) {
       setStatusMessage('添加失败，请稍后重试');
     } finally {
@@ -127,7 +112,7 @@ export default function AdminTagPage() {
         throw new Error('archive failed');
       }
       setStatusMessage(data.message || '归档成功');
-      await fetchTags(false);
+      await refreshTags();
     } catch (error) {
       setStatusMessage('归档失败，请稍后重试');
     } finally {

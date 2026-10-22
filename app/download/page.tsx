@@ -80,11 +80,11 @@ export default function DownloadPage() {
 
     const downloadId = getDownloadId(trimmedPath);
     if (!downloadId) {
-      window.location.href = trimmedPath;
+      window.location.assign(trimmedPath);
       return;
     }
 
-    window.location.href = getDownloadUrl(downloadId);
+    window.location.assign(getDownloadUrl(downloadId));
   };
 
   return (

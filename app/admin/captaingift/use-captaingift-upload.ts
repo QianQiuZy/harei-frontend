@@ -1,7 +1,8 @@
 'use client';
 
 import { useRouter } from 'next/navigation';
-import { useEffect, useState } from 'react';
+import { useState } from 'react';
+import { useLegacyAdminToken } from '@/lib/auth/useLegacyAdminToken';
 
 import type { CaptaingiftImageStatus } from './components';
 
@@ -18,8 +19,6 @@ type CaptaingiftUploadState = {
 };
 
 const API_HOST = 'https://api.harei.cn';
-const TOKEN_KEY = 'harei-admin-token';
-const TOKEN_EXPIRES_KEY = 'harei-admin-token-expires';
 const SAVED_MONTH_KEY = 'harei-admin-captaingift-month';
 
 const getErrorMessage = (data: UploadResponse | null) => {
@@ -41,25 +40,11 @@ export function useCaptaingiftUpload({
   selectedMonth
 }: CaptaingiftUploadState) {
   const router = useRouter();
-  const [token, setToken] = useState<string | null>(null);
+  const token = useLegacyAdminToken();
   const [statusMessage, setStatusMessage] = useState('');
   const [file, setFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
-
-  useEffect(() => {
-    const storedToken = localStorage.getItem(TOKEN_KEY);
-    const expiresAt = Number(localStorage.getItem(TOKEN_EXPIRES_KEY));
-
-    if (!storedToken || !expiresAt || Number.isNaN(expiresAt) || Date.now() > expiresAt) {
-      localStorage.removeItem(TOKEN_KEY);
-      localStorage.removeItem(TOKEN_EXPIRES_KEY);
-      router.replace('/login');
-      return;
-    }
-
-    setToken(storedToken);
-  }, [router]);
 
   const handleFileSelection = (selectedFile: File) => {
     if (!selectedFile.type.startsWith('image/')) {

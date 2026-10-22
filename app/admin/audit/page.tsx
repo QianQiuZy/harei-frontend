@@ -179,27 +179,16 @@ export default function AdminMessagePage() {
     [filteredItems, selectedId]
   );
 
-  useEffect(() => {
-    if (!selectedTag) {
-      return;
-    }
-    if (!availableTags.includes(selectedTag)) {
-      setSelectedTag('');
-    }
-  }, [availableTags, selectedTag]);
+  if (selectedTag && !availableTags.includes(selectedTag)) {
+    setSelectedTag('');
+  }
 
-  useEffect(() => {
-    if (!filteredItems.length) {
-      setSelectedId(null);
-      return;
-    }
-    setSelectedId((current) => {
-      if (current !== null && filteredItems.some((item) => item.id === current)) {
-        return current;
-      }
-      return filteredItems[0].id;
-    });
-  }, [filteredItems]);
+  const nextSelectedId = filteredItems.some((item) => item.id === selectedId)
+    ? selectedId
+    : filteredItems[0]?.id ?? null;
+  if (selectedId !== nextSelectedId) {
+    setSelectedId(nextSelectedId);
+  }
 
   useEffect(() => {
     if (selectedId === null) {

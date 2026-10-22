@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useCallback, useEffect, useMemo, useState } from 'react';
 import { API_BASE_URL } from '@/lib/api';
 import { buildCaptaingiftImageUrl } from '@/lib/captaingift-image';
 import { buildCaptaingiftMonthOptions } from '@/lib/captaingift-months';
@@ -28,7 +28,7 @@ export function useCaptaingiftArchive() {
   const [archiveError, setArchiveError] = useState<string | null>(null);
   const [isArchiveLoading, setIsArchiveLoading] = useState(true);
   const [selectedMonth, setSelectedMonth] = useState(currentMonth);
-  const [imageStatus, setImageStatus] = useState<CaptaingiftImageStatus>('idle');
+  const [imageResult, setImageResult] = useState<{ key: string; status: CaptaingiftImageStatus } | null>(null);
 
   const monthOptions = useMemo(
     () => buildCaptaingiftMonthOptions(archiveItems, currentMonth),
@@ -38,6 +38,16 @@ export function useCaptaingiftArchive() {
     () => archiveItems.find((item) => item.month === selectedMonth),
     [archiveItems, selectedMonth]
   );
+  const imagePath = selectedItem?.path ?? '';
+  const imageRequestKey = `${selectedMonth}:${imagePath}`;
+  const imageStatus: CaptaingiftImageStatus = !selectedMonth
+    ? 'idle'
+    : !imagePath
+      ? 'missing'
+      : imageResult?.key === imageRequestKey ? imageResult.status : 'loading';
+  const setImageStatus = useCallback((status: CaptaingiftImageStatus) => {
+    setImageResult({ key: imageRequestKey, status });
+  }, [imageRequestKey]);
 
   useEffect(() => {
     const controller = new AbortController();
@@ -83,21 +93,13 @@ export function useCaptaingiftArchive() {
   }, [currentMonth]);
 
   useEffect(() => {
-    if (!selectedMonth) {
-      setImageStatus('idle');
-      return;
-    }
-    if (!selectedItem?.path) {
-      setImageStatus('missing');
-      return;
-    }
+    if (!selectedMonth || !imagePath) return;
 
     const controller = new AbortController();
 
     const fetchImage = async () => {
-      setImageStatus('loading');
       try {
-        const response = await fetch(buildCaptaingiftImageUrl(selectedItem.path), {
+        const response = await fetch(buildCaptaingiftImageUrl(imagePath), {
           cache: 'no-store',
           signal: controller.signal
         });
@@ -123,14 +125,9 @@ export function useCaptaingiftArchive() {
     fetchImage();
 
     return () => controller.abort();
-  }, [selectedItem?.path, selectedMonth]);
+  }, [imagePath, selectedMonth, setImageStatus]);
 
-  const imageUrl = useMemo(() => {
-    if (!selectedItem?.path) {
-      return '';
-    }
-    return buildCaptaingiftImageUrl(selectedItem.path);
-  }, [selectedItem?.path]);
+  const imageUrl = imagePath ? buildCaptaingiftImageUrl(imagePath) : '';
 
   return {
     archiveError,

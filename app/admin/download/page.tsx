@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
+import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useLegacyAdminToken } from '@/lib/auth/useLegacyAdminToken';
 
 type DownloadAddResponse = {
   code?: number;
@@ -12,8 +13,6 @@ type DownloadAddResponse = {
 };
 
 const API_HOST = 'https://api.harei.cn';
-const TOKEN_KEY = 'harei-admin-token';
-const TOKEN_EXPIRES_KEY = 'harei-admin-token-expires';
 const ARCHIVE_EXTENSIONS = ['.zip', '.rar', '.7z', '.tar', '.gz', '.tgz', '.bz2', '.xz'];
 
 const isArchiveFile = (file: File) => {
@@ -36,7 +35,7 @@ const getErrorMessage = (data: DownloadAddResponse | null) => {
 
 export default function AdminDownloadPage() {
   const router = useRouter();
-  const [token, setToken] = useState<string | null>(null);
+  const token = useLegacyAdminToken();
   const [name, setName] = useState('');
   const [link, setLink] = useState('');
   const [file, setFile] = useState<File | null>(null);
@@ -44,20 +43,6 @@ export default function AdminDownloadPage() {
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDragOver, setIsDragOver] = useState(false);
   const fileInputRef = useRef<HTMLInputElement | null>(null);
-
-  useEffect(() => {
-    const storedToken = localStorage.getItem(TOKEN_KEY);
-    const expiresAt = Number(localStorage.getItem(TOKEN_EXPIRES_KEY));
-
-    if (!storedToken || !expiresAt || Number.isNaN(expiresAt) || Date.now() > expiresAt) {
-      localStorage.removeItem(TOKEN_KEY);
-      localStorage.removeItem(TOKEN_EXPIRES_KEY);
-      router.replace('/login');
-      return;
-    }
-
-    setToken(storedToken);
-  }, [router]);
 
   const handleFileSelection = (selectedFile: File) => {
     if (!isArchiveFile(selectedFile)) {

@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from 'react';
+import { useSyncExternalStore } from 'react';
 import { usePathname } from 'next/navigation';
 
 type BackgroundArea = 'front' | 'admin';
@@ -37,46 +37,26 @@ const writeSetting = (area: BackgroundArea, enabled: boolean) => {
   );
 };
 
+const subscribe = (onChange: () => void) => {
+  window.addEventListener('harei-bg-animation-change', onChange);
+  window.addEventListener('storage', onChange);
+  return () => {
+    window.removeEventListener('harei-bg-animation-change', onChange);
+    window.removeEventListener('storage', onChange);
+  };
+};
+
 export const useBackgroundAnimation = (): AnimationSetting => {
   const pathname = usePathname();
-  const area = useMemo<BackgroundArea>(
-    () => (pathname.startsWith('/admin') ? 'admin' : 'front'),
-    [pathname]
+  const area: BackgroundArea = pathname.startsWith('/admin') ? 'admin' : 'front';
+  const enabled = useSyncExternalStore(
+    subscribe,
+    () => readSetting(area),
+    () => getDefaultEnabled(area)
   );
-  const [enabled, setEnabled] = useState(() => getDefaultEnabled(area));
-
-  useEffect(() => {
-    setEnabled(readSetting(area));
-  }, [area]);
-
-  useEffect(() => {
-    const handleChange = (event: Event) => {
-      if (event instanceof CustomEvent) {
-        const detail = event.detail as { area: BackgroundArea; enabled: boolean };
-        if (detail.area === area) {
-          setEnabled(detail.enabled);
-        }
-      }
-    };
-
-    const handleStorage = (event: StorageEvent) => {
-      if (event.key === getStorageKey(area)) {
-        setEnabled(readSetting(area));
-      }
-    };
-
-    window.addEventListener('harei-bg-animation-change', handleChange);
-    window.addEventListener('storage', handleStorage);
-
-    return () => {
-      window.removeEventListener('harei-bg-animation-change', handleChange);
-      window.removeEventListener('storage', handleStorage);
-    };
-  }, [area]);
 
   const toggle = () => {
     const nextValue = !enabled;
-    setEnabled(nextValue);
     writeSetting(area, nextValue);
   };
 

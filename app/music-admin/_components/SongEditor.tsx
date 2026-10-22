@@ -37,10 +37,7 @@ export const SongEditor = ({ songId }: { readonly songId: number | null }) => {
 	const [message, setMessage] = useState<string | null>(null);
 	const [conflict, setConflict] = useState(false);
 
-	const load = useCallback(async () => {
-		if (!songId) return;
-		const response = await getManagedSong(session.token, songId);
-		const song = response.item;
+	const applySong = useCallback((song: ManagedSongDetail["item"]) => {
 		setDetail(song);
 		setDraft({
 			title: song.title,
@@ -53,13 +50,24 @@ export const SongEditor = ({ songId }: { readonly songId: number | null }) => {
 			metadata_status: song.metadataStatus,
 		});
 		setArtistsText(song.artists.join(" / "));
-	}, [session.token, songId]);
+	}, []);
+
+	const load = useCallback(async () => {
+		if (!songId) return;
+		const response = await getManagedSong(session.token, songId);
+		applySong(response.item);
+	}, [applySong, session.token, songId]);
 
 	useEffect(() => {
-		void load().catch((reason: unknown) =>
-			setMessage(reason instanceof Error ? reason.message : "歌曲加载失败"),
-		);
-	}, [load]);
+		if (!songId) return;
+		let active = true;
+		void getManagedSong(session.token, songId)
+			.then((response) => { if (active) applySong(response.item); })
+			.catch((reason: unknown) => {
+				if (active) setMessage(reason instanceof Error ? reason.message : "歌曲加载失败");
+			});
+		return () => { active = false; };
+	}, [applySong, session.token, songId]);
 
 	const set = (field: keyof SongDraft, value: string) =>
 		setDraft((current) => ({ ...current, [field]: value }));

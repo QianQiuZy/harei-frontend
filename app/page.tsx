@@ -2,6 +2,7 @@
 
 import { useEffect, useRef, useState } from 'react';
 import { createBirthdayFireworks } from '@/components/background/createBirthdayFireworks';
+import { useHydrated } from '@/lib/use-hydrated';
 
 type LiveStatus = {
   status: number | null;
@@ -65,12 +66,13 @@ const formatDuration = (milliseconds: number) => {
 export default function HomePage() {
   const [now, setNow] = useState(() => Date.now());
   const [liveStatus, setLiveStatus] = useState<LiveStatus>({ status: null, liveTime: null });
-  const [randomText, setRandomText] = useState(() => RANDOM_TEXTS[0]);
+  const hydrated = useHydrated();
+  const [clientRandomText] = useState(() => RANDOM_TEXTS[Math.floor(Math.random() * RANDOM_TEXTS.length)]);
+  const randomText = hydrated ? clientRandomText : RANDOM_TEXTS[0];
   const audioRef = useRef<HTMLAudioElement | null>(null);
   const fireworksRef = useRef<HTMLCanvasElement | null>(null);
 
   useEffect(() => {
-    setRandomText(RANDOM_TEXTS[Math.floor(Math.random() * RANDOM_TEXTS.length)]);
     const timer = setInterval(() => setNow(Date.now()), 1000);
     return () => clearInterval(timer);
   }, []);

@@ -1,7 +1,8 @@
 'use client';
 
-import { useEffect, useMemo, useRef, useState } from 'react';
+import { useEffect, useRef, useState, useSyncExternalStore } from 'react';
 import { useBackgroundAnimation } from './useBackgroundAnimation';
+import { useHydrated } from '@/lib/use-hydrated';
 
 const DESKTOP_IMAGES = [
   '/images/back/back1.jpg',
@@ -47,48 +48,39 @@ const readStoredIndex = (area: string, imageKey: string, length: number) => {
   return ((parsed % length) + length) % length;
 };
 
-export const BackgroundSlideshow = () => {
-  const { enabled, area } = useBackgroundAnimation();
-  const [isMobile, setIsMobile] = useState(getIsMobile);
-  const [currentIndex, setCurrentIndex] = useState(0);
-  const [nextIndex, setNextIndex] = useState(1);
+const subscribeToResize = (onChange: () => void) => {
+  window.addEventListener('resize', onChange);
+  return () => window.removeEventListener('resize', onChange);
+};
+const getServerIsMobile = () => false;
+
+type SlideshowProps = {
+  area: string;
+  enabled: boolean;
+  images: readonly string[];
+};
+
+const Slideshow = ({ area, enabled, images }: SlideshowProps) => {
+  const hydrated = useHydrated();
+  const imageKey = images.join('|');
+  const [currentIndex, setCurrentIndex] = useState(() => readStoredIndex(area, imageKey, images.length));
+  const [nextIndex, setNextIndex] = useState(() => (readStoredIndex(area, imageKey, images.length) + 1) % images.length);
   const [isFading, setIsFading] = useState(false);
   const currentRef = useRef(currentIndex);
-
-  const images = useMemo(() => (isMobile ? MOBILE_IMAGES : DESKTOP_IMAGES), [isMobile]);
-  const imageKey = images.join('|');
-
-  useEffect(() => {
-    const handleResize = () => {
-      setIsMobile(getIsMobile());
-    };
-
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
 
   useEffect(() => {
     currentRef.current = currentIndex;
   }, [currentIndex]);
 
   useEffect(() => {
-    const storedIndex = readStoredIndex(area, imageKey, images.length);
-    setCurrentIndex(storedIndex);
-    setNextIndex(images.length > 1 ? (storedIndex + 1) % images.length : storedIndex);
-    currentRef.current = storedIndex;
-    setIsFading(false);
-  }, [area, imageKey, images.length]);
-
-  useEffect(() => {
-    if (typeof window === 'undefined') {
+    if (!hydrated) {
       return;
     }
     window.localStorage.setItem(getStorageKey(area, imageKey), String(currentIndex));
-  }, [area, imageKey, currentIndex]);
+  }, [area, imageKey, currentIndex, hydrated]);
 
   useEffect(() => {
     if (!enabled || images.length < 2) {
-      setIsFading(false);
       return;
     }
 
@@ -113,24 +105,31 @@ export const BackgroundSlideshow = () => {
     };
   }, [enabled, images.length]);
 
-  const showNext = enabled && isFading;
+  const showNext = hydrated && enabled && isFading;
 
   return (
     <div className="background-slideshow" aria-hidden="true">
       <div
         className="background-layer"
         style={{
-          backgroundImage: `url(${images[currentIndex]})`,
+          backgroundImage: `url(${images[hydrated ? currentIndex : 0]})`,
           opacity: 1
         }}
       />
       <div
         className="background-layer"
         style={{
-          backgroundImage: `url(${images[nextIndex]})`,
+          backgroundImage: `url(${images[hydrated ? nextIndex : 1]})`,
           opacity: showNext ? 1 : 0
         }}
       />
     </div>
   );
+};
+
+export const BackgroundSlideshow = () => {
+  const { enabled, area } = useBackgroundAnimation();
+  const isMobile = useSyncExternalStore(subscribeToResize, getIsMobile, getServerIsMobile);
+  const images = isMobile ? MOBILE_IMAGES : DESKTOP_IMAGES;
+  return <Slideshow key={`${area}:${isMobile}:${enabled}`} area={area} enabled={enabled} images={images} />;
 };

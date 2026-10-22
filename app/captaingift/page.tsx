@@ -67,12 +67,7 @@ export default function CaptaingiftPage() {
     () => items.find((item) => item.month === selectedMonth),
     [items, selectedMonth]
   );
-  const imageUrl = useMemo(() => {
-    if (!selectedItem?.path) {
-      return '';
-    }
-    return buildCaptaingiftImageUrl(selectedItem.path);
-  }, [selectedItem?.path]);
+  const imageUrl = selectedItem?.path ? buildCaptaingiftImageUrl(selectedItem.path) : '';
 
   return (
     <div className="captaingift-page">

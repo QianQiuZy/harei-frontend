@@ -6,7 +6,7 @@ export const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL ?? 'https://ap
 );
 
 export const apiClient = ky.create({
-  prefixUrl: `${API_BASE_URL}/`,
+  prefix: `${API_BASE_URL}/`,
   timeout: 15_000,
   retry: {
     limit: 1,

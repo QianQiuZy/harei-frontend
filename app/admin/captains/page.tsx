@@ -2,6 +2,7 @@
 
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { useLegacyAdminToken } from '@/lib/auth/useLegacyAdminToken';
 
 type CaptainItem = {
   uid: string;
@@ -21,8 +22,6 @@ type ErrorResponse = {
 };
 
 const API_HOST = 'https://api.harei.cn';
-const TOKEN_KEY = 'harei-admin-token';
-const TOKEN_EXPIRES_KEY = 'harei-admin-token-expires';
 const MIN_MONTH_NUMBER = 202601;
 
 const formatMonthNumber = (value: number) => {
@@ -71,7 +70,7 @@ const formatDateTime = (value: string) => {
 
 export default function AdminCaptainsPage() {
   const router = useRouter();
-  const [token, setToken] = useState<string | null>(null);
+  const token = useLegacyAdminToken();
   const [items, setItems] = useState<CaptainItem[]>([]);
   const [statusMessage, setStatusMessage] = useState('');
   const [isLoading, setIsLoading] = useState(true);
@@ -84,20 +83,6 @@ export default function AdminCaptainsPage() {
   );
   const monthOptions = useMemo(() => buildMonthOptions(defaultMonthNumber), [defaultMonthNumber]);
   const [selectedMonth, setSelectedMonth] = useState(() => formatMonthNumber(defaultMonthNumber));
-
-  useEffect(() => {
-    const storedToken = localStorage.getItem(TOKEN_KEY);
-    const expiresAt = Number(localStorage.getItem(TOKEN_EXPIRES_KEY));
-
-    if (!storedToken || !expiresAt || Number.isNaN(expiresAt) || Date.now() > expiresAt) {
-      localStorage.removeItem(TOKEN_KEY);
-      localStorage.removeItem(TOKEN_EXPIRES_KEY);
-      router.replace('/login');
-      return;
-    }
-
-    setToken(storedToken);
-  }, [router]);
 
   useEffect(() => {
     if (!token) {

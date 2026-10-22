@@ -2,13 +2,14 @@
 
 import { ArrowUp } from "lucide-react";
 import Image from "next/image";
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { MusicFilters } from "@/app/music/_components/MusicFilters";
 import { SongDialog } from "@/app/music/_components/SongDialog";
 import { SongList } from "@/app/music/_components/SongList";
 import {
 	getSong,
 	listMusic,
+	type MusicQuery,
 	type MusicSort,
 	type SearchMode,
 } from "@/lib/music/client";
@@ -37,8 +38,21 @@ export const MusicCatalog = () => {
 	const [facets, setFacets] = useState(EMPTY_FACETS);
 	const [total, setTotal] = useState(0);
 	const [stats, setStats] = useState({ song_count: 0, performance_count: 0 });
-	const [loading, setLoading] = useState(true);
-	const [error, setError] = useState<string | null>(null);
+	const request = useMemo<MusicQuery>(() => ({
+		q: debouncedQuery || undefined,
+		searchMode,
+		genre: genre || undefined,
+		language: language || undefined,
+		workType: workType || undefined,
+		sort,
+		order: sort === "title" ? "asc" : "desc",
+		page: 1,
+		pageSize: 1000,
+	}), [debouncedQuery, genre, language, searchMode, sort, workType]);
+	const [completedRequest, setCompletedRequest] = useState<MusicQuery | null>(null);
+	const [loadError, setLoadError] = useState<{ request: MusicQuery; message: string } | null>(null);
+	const loading = completedRequest !== request;
+	const error = !loading && loadError?.request === request ? loadError.message : null;
 	const [selected, setSelected] = useState<SongDetailResponse["item"] | null>(
 		null,
 	);
@@ -58,42 +72,32 @@ export const MusicCatalog = () => {
 
 	useEffect(() => {
 		let active = true;
-		setLoading(true);
-		setError(null);
-		void listMusic({
-			q: debouncedQuery || undefined,
-			searchMode,
-			genre: genre || undefined,
-			language: language || undefined,
-			workType: workType || undefined,
-			sort,
-			order: sort === "title" ? "asc" : "desc",
-			page: 1,
-			pageSize: 1000,
-		})
+		void listMusic(request)
 			.then((response) => {
 				if (!active) return;
 				setSongs(response.items);
 				setFacets(response.facets);
 				setTotal(response.total);
 				setStats(response.stats);
+				setLoadError(null);
 			})
 			.catch((reason: unknown) => {
 				if (!active) return;
-				setError(
-					reason instanceof Error
+				setLoadError({
+					request,
+					message: reason instanceof Error
 						? reason.message
 						: "歌单加载失败，请稍后再试。",
-				);
+				});
 				setSongs([]);
 			})
 			.finally(() => {
-				if (active) setLoading(false);
+				if (active) setCompletedRequest(request);
 			});
 		return () => {
 			active = false;
 		};
-	}, [debouncedQuery, genre, language, searchMode, sort, workType]);
+	}, [request]);
 
 	useEffect(() => {
 		const heading = headingRef.current;
