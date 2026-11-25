@@ -1,10 +1,11 @@
 'use client';
 
-import { useEffect, useRef, useState } from 'react';
-import { ApiError, onMemberSessionChange, personalQuery, request, type SecurityAction } from '@/lib/member';
+import { useRef, useState } from 'react';
+import { ApiError, personalQuery, request, type SecurityAction } from '@/lib/member';
 import { ActionForm, CurrentPasswordField, errorText, Field, Panel, s, value } from './MemberUI';
 import { MemberDialog } from './MemberDialog';
 import EmailCodeForm from './EmailCodeForm';
+import { useMemberData } from './useMemberData';
 
 function VerificationCode({ label }: { label: string }) {
   return (
@@ -157,37 +158,12 @@ function DeleteAccount({ email, done }: { email: string; done: () => void }) {
 }
 
 export default function SecurityActionForm({ mode }: { mode: SecurityAction }) {
-  const [email, setEmail] = useState('');
-  const [error, setError] = useState('');
-  const [revision, setRevision] = useState(0);
-  useEffect(() => onMemberSessionChange(() => {
-    setEmail('');
-    setRevision((n) => n + 1);
-  }), []);
-  useEffect(() => {
-    let active = true;
-    request<{ email: string }>('/me/account')
-      .then((result) => {
-        if (active) {
-          setEmail(result.email);
-          setError('');
-        }
-      })
-      .catch((err) => {
-        if (!active) return;
-        if (err instanceof ApiError && err.status === 401) {
-          setEmail('');
-          window.location.replace('/account/login' + personalQuery(undefined, mode));
-        } else setError(errorText(err));
-      });
-    return () => {
-      active = false;
-    };
-  }, [mode, revision]);
+  const { data, error, reload } = useMemberData<{ email: string }>('/me/account', personalQuery(undefined, mode));
+  const email = data?.email;
   if (error)
     return (
       <p role="alert">
-        {error} <button onClick={() => setRevision((n) => n + 1)}>重试</button>
+        {error} <button onClick={() => void reload()}>重试</button>
       </p>
     );
   if (!email) return <p className={s.empty}>正在读取账号…</p>;

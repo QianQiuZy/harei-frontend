@@ -199,12 +199,11 @@ function GiftCard({
       if (delay <= 0) {
         setExpiredAt(end);
         setEditing(false);
-        void reload();
       } else timer = setTimeout(schedule, Math.min(delay + 30, 2147483647));
     }
     schedule();
     return () => clearTimeout(timer);
-  }, [active, boundary, reload]);
+  }, [active, boundary]);
   const editable = active && (!boundary || expiredAt !== boundary);
   async function saveAddress(
     address: (Address & { confirm_refill?: boolean }) | { use_default: true }

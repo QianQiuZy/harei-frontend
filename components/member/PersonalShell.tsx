@@ -3,9 +3,10 @@
 import Image from 'next/image';
 import DocumentLink from '@/components/DocumentLink';
 import { usePathname } from 'next/navigation';
-import { Fragment, useCallback, useEffect, useState, type ReactNode } from 'react';
-import { ApiError, onMemberSessionChange, request, type Profile } from '@/lib/member';
-import { ActionForm, errorText, s } from './MemberUI';
+import { Fragment, useEffect, useRef, type ReactNode } from 'react';
+import { request, type Profile } from '@/lib/member';
+import { ActionForm, s } from './MemberUI';
+import { useMemberData } from './useMemberData';
 
 type Props = {
   title?: string;
@@ -16,56 +17,33 @@ type Props = {
 
 export default function PersonalShell({ title, loginQuery, children, watchGifts = false }: Props) {
   const pathname = usePathname();
-  const [profile, setProfile] = useState<Profile | null>(null);
-  const [error, setError] = useState('');
-  const [revision, setRevision] = useState(0);
-  const reload = useCallback(async () => {
-    setRevision((n) => n + 1);
-  }, []);
+  const { data: profile, error, reload, clear } = useMemberData<Profile>('/me', loginQuery);
+  const refreshedThrough = useRef(0);
   useEffect(() => {
-    window.addEventListener('focus', reload);
-    const unsubscribe = onMemberSessionChange(() => {
-      setProfile(null);
-      void reload();
-    });
-    return () => {
-      window.removeEventListener('focus', reload);
-      unsubscribe();
-    };
-  }, [reload]);
-  useEffect(() => {
-    let active = true;
-    let timer: ReturnType<typeof setTimeout>;
-    async function fetchProfile() {
-      try {
-        const result = await request<Profile>('/me');
-        if (active) {
-          setProfile(result);
-          setError('');
-        }
-      } catch (err) {
-        if (!active) return;
-        if (err instanceof ApiError && err.status === 401) {
-          setProfile(null);
-          window.location.replace('/account/login' + loginQuery);
-          return;
-        }
-        setError(errorText(err));
-      }
-      if (active && watchGifts && !document.hidden) timer = setTimeout(fetchProfile, 5000);
+    if (!watchGifts || !profile) return;
+    let nextDeadline = Infinity;
+    for (const gift of profile.gifts) {
+      if (gift.frozen_at || (gift.state !== 'open' && gift.state !== 'grace')) continue;
+      const boundary = gift.grace_until || gift.deadline;
+      if (!boundary) continue;
+      const deadline = Date.parse(boundary + '+08:00');
+      if (deadline > refreshedThrough.current) nextDeadline = Math.min(nextDeadline, deadline);
     }
-    const onVisible = () => {
-      clearTimeout(timer);
-      if (!document.hidden) void reload();
-    };
-    if (watchGifts) document.addEventListener('visibilitychange', onVisible);
-    void fetchProfile();
-    return () => {
-      active = false;
-      clearTimeout(timer);
-      document.removeEventListener('visibilitychange', onVisible);
-    };
-  }, [revision, loginQuery, watchGifts, reload]);
+    if (!Number.isFinite(nextDeadline)) return;
+    let timer: ReturnType<typeof setTimeout>;
+    function schedule() {
+      const now = Date.now();
+      const remaining = nextDeadline - now;
+      if (remaining <= 0) {
+        refreshedThrough.current = now;
+        void reload();
+      } else {
+        timer = setTimeout(schedule, Math.min(remaining + 30, 2147483647));
+      }
+    }
+    schedule();
+    return () => clearTimeout(timer);
+  }, [profile, reload, watchGifts]);
   return (
     <div className={`${s.page} ${s.workspace} ${s.personal}`}>
       <header className={`${s.workspaceHeader} ${s.personalHeader}`}>
@@ -82,7 +60,7 @@ export default function PersonalShell({ title, loginQuery, children, watchGifts 
               submit="退出登录"
               action={async () => {
                 await request('/user-auth/logout', {});
-                setProfile(null);
+                clear();
                 sessionStorage.removeItem('harei-binding-flow:' + profile.email);
                 window.location.replace('/account/login');
               }}
