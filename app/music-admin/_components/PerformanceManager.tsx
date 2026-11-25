@@ -1,5 +1,6 @@
 "use client";
 
+import { resolveApiLink } from '@/lib/api-origin';
 import { ExternalLink, Pencil, Plus, Trash2, X } from "lucide-react";
 import { useState } from "react";
 import type { Performance } from "@/lib/music/schemas";
@@ -192,7 +193,7 @@ export const PerformanceManager = ({
 						</div>
 						{performance.clipUrl ? (
 							<a
-								href={performance.clipUrl}
+								href={resolveApiLink(performance.clipUrl)}
 								target="_blank"
 								rel="noreferrer noopener"
 								aria-label="打开歌切"

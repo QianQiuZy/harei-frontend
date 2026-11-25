@@ -20,7 +20,7 @@ describe('server-side emoji listing proxy', () => {
     const response = await GET();
 
     expect(fetchMock).toHaveBeenCalledWith('http://backend.internal:6555/emoji', {
-      cache: 'no-store'
+      cache: 'no-store', redirect: 'error'
     });
     expect(response.status).toBe(200);
   });

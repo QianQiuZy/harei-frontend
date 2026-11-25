@@ -1,3 +1,4 @@
+import { resolveApiLink } from '@/lib/api-origin';
 import { ExternalLink } from 'lucide-react';
 import type { SongSummary } from '@/lib/music/schemas';
 import styles from '../music.module.css';
@@ -31,7 +32,7 @@ export const SongList = ({ songs, loading, onOpen }: SongListProps) => {
             {song.latestLink ? (
               <a
                 className={styles.listenLink}
-                href={song.latestLink}
+                href={resolveApiLink(song.latestLink)}
                 target="_blank"
                 rel="noreferrer noopener"
                 aria-label={`打开《${song.title}》最近一次演唱歌切`}

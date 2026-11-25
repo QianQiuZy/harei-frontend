@@ -1,5 +1,6 @@
 'use client';
 
+import { API_BASE_URL } from '@/lib/api-origin';
 import { useRef, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useLegacyAdminToken } from '@/lib/auth/useLegacyAdminToken';
@@ -12,7 +13,6 @@ type DownloadAddResponse = {
   message?: string;
 };
 
-const API_HOST = 'https://api.harei.cn';
 const ARCHIVE_EXTENSIONS = ['.zip', '.rar', '.7z', '.tar', '.gz', '.tgz', '.bz2', '.xz'];
 
 const isArchiveFile = (file: File) => {
@@ -85,7 +85,7 @@ export default function AdminDownloadPage() {
       let response: Response;
 
       if (trimmedLink) {
-        response = await fetch(`${API_HOST}/download/add`, {
+        response = await fetch(`${API_BASE_URL}/download/add`, {
           method: 'POST',
           headers: {
             Authorization: `Bearer ${token}`,
@@ -98,7 +98,7 @@ export default function AdminDownloadPage() {
         formData.append('description', trimmedName);
         formData.append('file', file);
 
-        response = await fetch(`${API_HOST}/download/add`, {
+        response = await fetch(`${API_BASE_URL}/download/add`, {
           method: 'POST',
           headers: {
             Authorization: `Bearer ${token}`

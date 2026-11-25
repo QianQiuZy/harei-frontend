@@ -1,8 +1,10 @@
 'use client';
 
+import { API_BASE_URL } from '@/lib/api-origin';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useLegacyAdminToken } from '@/lib/auth/useLegacyAdminToken';
+import { feedbackAnchor, useActionFeedback } from '@/components/member/ActionFeedback';
 
 import type { CaptaingiftImageStatus } from './components';
 
@@ -14,12 +16,9 @@ type UploadResponse = {
 
 type CaptaingiftUploadState = {
   readonly imageStatus: CaptaingiftImageStatus;
-  readonly onDeleteSuccess: () => void;
+  readonly onArchiveChange: () => void;
   readonly selectedMonth: string;
 };
-
-const API_HOST = 'https://api.harei.cn';
-const SAVED_MONTH_KEY = 'harei-admin-captaingift-month';
 
 const getErrorMessage = (data: UploadResponse | null) => {
   if (!data) {
@@ -36,28 +35,29 @@ const getErrorMessage = (data: UploadResponse | null) => {
 
 export function useCaptaingiftUpload({
   imageStatus,
-  onDeleteSuccess,
+  onArchiveChange,
   selectedMonth
 }: CaptaingiftUploadState) {
   const router = useRouter();
   const token = useLegacyAdminToken();
-  const [statusMessage, setStatusMessage] = useState('');
+  const setFeedback = useActionFeedback();
   const [file, setFile] = useState<File | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [isDeleting, setIsDeleting] = useState(false);
 
-  const handleFileSelection = (selectedFile: File) => {
+  const handleFileSelection = (selectedFile: File, trigger: HTMLElement) => {
     if (!selectedFile.type.startsWith('image/')) {
-      setStatusMessage('请上传图片文件');
+      setFeedback({ text: '请上传图片文件', error: true, anchor: feedbackAnchor(trigger) });
       return;
     }
     setFile(selectedFile);
-    setStatusMessage('');
+    setFeedback(null);
   };
 
-  const handleSubmit = async () => {
+  const handleSubmit = async (trigger: HTMLButtonElement) => {
+    const anchor = feedbackAnchor(trigger);
     if (!file) {
-      setStatusMessage('请上传图片');
+      setFeedback({ text: '请上传图片', error: true, anchor });
       return;
     }
 
@@ -67,14 +67,14 @@ export function useCaptaingiftUpload({
     }
 
     setIsSubmitting(true);
-    setStatusMessage('');
+    setFeedback(null);
 
     try {
       const formData = new FormData();
       formData.append('month', selectedMonth);
       formData.append('file', file);
 
-      const response = await fetch(`${API_HOST}/captaingift/add`, {
+      const response = await fetch(`${API_BASE_URL}/captaingift/add`, {
         method: 'POST',
         headers: { Authorization: `Bearer ${token}` },
         body: formData
@@ -88,21 +88,22 @@ export function useCaptaingiftUpload({
       }
 
       if (!response.ok || responseData?.code !== 0) {
-        setStatusMessage(getErrorMessage(responseData));
+        setFeedback({ text: getErrorMessage(responseData), error: true, anchor });
         return;
       }
 
-      setStatusMessage('上传成功');
-      sessionStorage.setItem(SAVED_MONTH_KEY, selectedMonth);
-      setTimeout(() => window.location.reload(), 1200);
+      setFile(null);
+      setFeedback({ text: '上传成功', anchor });
+      onArchiveChange();
     } catch {
-      setStatusMessage('上传失败，请稍后再试');
+      setFeedback({ text: '上传失败，请稍后再试', error: true, anchor });
     } finally {
       setIsSubmitting(false);
     }
   };
 
-  const handleDelete = async () => {
+  const handleDelete = async (trigger: HTMLButtonElement) => {
+    const anchor = feedbackAnchor(trigger);
     if (!token || imageStatus !== 'available') {
       return;
     }
@@ -112,10 +113,10 @@ export function useCaptaingiftUpload({
     }
 
     setIsDeleting(true);
-    setStatusMessage('');
+    setFeedback(null);
 
     try {
-      const response = await fetch(`${API_HOST}/captaingift/delete`, {
+      const response = await fetch(`${API_BASE_URL}/captaingift/delete`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -132,15 +133,15 @@ export function useCaptaingiftUpload({
       }
 
       if (!response.ok || responseData?.code !== 0) {
-        setStatusMessage('删除失败，请稍后重试');
+        setFeedback({ text: '删除失败，请稍后重试', error: true, anchor });
         return;
       }
 
       setFile(null);
-      onDeleteSuccess();
-      setStatusMessage('删除成功');
+      onArchiveChange();
+      setFeedback({ text: '删除成功', anchor });
     } catch {
-      setStatusMessage('删除失败，请稍后重试');
+      setFeedback({ text: '删除失败，请稍后重试', error: true, anchor });
     } finally {
       setIsDeleting(false);
     }
@@ -155,9 +156,8 @@ export function useCaptaingiftUpload({
     isSubmitting,
     reset: () => {
       setFile(null);
-      setStatusMessage('');
+      setFeedback(null);
     },
-    setFile,
-    statusMessage
+    setFile
   };
 }

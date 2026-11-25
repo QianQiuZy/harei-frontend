@@ -13,7 +13,7 @@ export default function AdminCaptaingiftPage() {
   const archive = useCaptaingiftArchive();
   const upload = useCaptaingiftUpload({
     imageStatus: archive.imageStatus,
-    onDeleteSuccess: () => archive.setImageStatus('missing'),
+    onArchiveChange: archive.reload,
     selectedMonth: archive.selectedMonth
   });
 
@@ -31,7 +31,6 @@ export default function AdminCaptaingiftPage() {
           selectedMonth={archive.selectedMonth}
           monthOptions={archive.monthOptions}
           imageStatus={archive.imageStatus}
-          statusMessage={upload.statusMessage}
           isDeleting={upload.isDeleting}
           isSubmitting={upload.isSubmitting}
           onMonthChange={handleMonthChange}

@@ -1,5 +1,7 @@
 'use client';
 
+import { API_BASE_URL } from '@/lib/api-origin';
+import { beijingGiftMonth } from '@/lib/captaingift-months';
 import { useEffect, useMemo, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useLegacyAdminToken } from '@/lib/auth/useLegacyAdminToken';
@@ -21,7 +23,6 @@ type ErrorResponse = {
   detail?: string;
 };
 
-const API_HOST = 'https://api.harei.cn';
 const MIN_MONTH_NUMBER = 202601;
 
 const formatMonthNumber = (value: number) => {
@@ -29,8 +30,6 @@ const formatMonthNumber = (value: number) => {
   const month = String(value % 100).padStart(2, '0');
   return `${year}${month}`;
 };
-
-const getMonthNumber = (date: Date) => date.getFullYear() * 100 + (date.getMonth() + 1);
 
 const decrementMonth = (value: number) => {
   const year = Math.floor(value / 100);
@@ -76,7 +75,7 @@ export default function AdminCaptainsPage() {
   const [isLoading, setIsLoading] = useState(true);
   const [isDownloading, setIsDownloading] = useState(false);
 
-  const currentMonthNumber = useMemo(() => getMonthNumber(new Date()), []);
+  const currentMonthNumber = useMemo(() => Number(beijingGiftMonth()), []);
   const defaultMonthNumber = useMemo(
     () => Math.max(currentMonthNumber, MIN_MONTH_NUMBER),
     [currentMonthNumber]
@@ -96,7 +95,7 @@ export default function AdminCaptainsPage() {
       setStatusMessage('');
 
       try {
-        const response = await fetch(`${API_HOST}/captains?month=${selectedMonth}`, {
+        const response = await fetch(`${API_BASE_URL}/captains?month=${selectedMonth}`, {
           headers: {
             Authorization: `Bearer ${token}`
           },
@@ -149,7 +148,7 @@ export default function AdminCaptainsPage() {
     setStatusMessage('');
 
     try {
-      const response = await fetch(`${API_HOST}/captains/xlsx?month=${selectedMonth}`, {
+      const response = await fetch(`${API_BASE_URL}/captains/xlsx?month=${selectedMonth}`, {
         headers: {
           Authorization: `Bearer ${token}`
         }

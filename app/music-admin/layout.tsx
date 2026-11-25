@@ -14,6 +14,9 @@ const ProtectedMusicAdmin = ({
   readonly children: ReactNode;
 }) => {
   const session = useProtectedSession(MUSIC_SCOPE, '/music-admin/login');
+  if (session.status === 'unavailable') {
+    return <div className={styles.gate} role="alert">暂时无法验证歌单管理权限。 <button onClick={session.retry}>重试</button></div>;
+  }
   if (session.status !== 'ready') {
     return <div className={styles.gate}>正在验证歌单管理权限…</div>;
   }

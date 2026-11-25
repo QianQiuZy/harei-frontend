@@ -17,6 +17,11 @@ export const metadata: Metadata = {
 export default function RootLayout({ children }: { children: ReactNode }) {
   return (
     <html lang="zh-CN">
+      <head>
+        {process.env.NODE_ENV === 'production' && (
+          <link rel="stylesheet" href="https://fontsapi.zeoseven.com/320/main/result.css" />
+        )}
+      </head>
       <body>
         <AppShell>{children}</AppShell>
       </body>

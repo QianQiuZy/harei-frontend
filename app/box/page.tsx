@@ -1,5 +1,6 @@
 'use client';
 
+import { API_BASE_URL } from '@/lib/api-origin';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { BoxEmojiEditor, type BoxEmojiEditorHandle } from '@/components/box/BoxEmojiEditor';
 import { EmojiPicker } from '@/components/box/EmojiPicker';
@@ -87,7 +88,7 @@ export default function BoxPage() {
 
     const fetchTags = async () => {
       try {
-        const response = await fetch('https://api.harei.cn/tag/active', {
+        const response = await fetch(`${API_BASE_URL}/tag/active`, {
           cache: 'no-store'
         });
         if (!response.ok) {
@@ -251,7 +252,7 @@ export default function BoxPage() {
         });
       }
 
-      const response = await fetch('https://api.harei.cn/box/uploads', {
+      const response = await fetch(`${API_BASE_URL}/box/uploads`, {
         method: 'POST',
         body: formData
       });

@@ -3,7 +3,7 @@ import { SERVER_API_BASE_URL } from '@/lib/server-api';
 
 export async function GET() {
   try {
-    const response = await fetch(`${SERVER_API_BASE_URL}/emoji`, { cache: 'no-store' });
+    const response = await fetch(`${SERVER_API_BASE_URL}/emoji`, { cache: 'no-store', redirect: 'error' });
     return new NextResponse(response.body, {
       status: response.status,
       headers: {

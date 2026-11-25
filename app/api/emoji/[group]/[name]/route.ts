@@ -18,7 +18,7 @@ export async function GET(
   try {
     const response = await fetch(
       `${SERVER_API_BASE_URL}/emoji/${encodeURIComponent(group)}/${encodeURIComponent(emojiName)}`,
-      { cache: 'no-store' }
+      { cache: 'no-store', redirect: 'error' }
     );
     const headers = new Headers();
     const contentType = response.headers.get('content-type');

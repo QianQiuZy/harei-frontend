@@ -1,7 +1,12 @@
 import { describe, expect, it } from 'vitest';
-import { buildCaptaingiftMonthOptions } from './captaingift-months';
+import { beijingGiftMonth, buildCaptaingiftMonthOptions, selectedGiftMonth } from './captaingift-months';
 
 describe('captaingift month options', () => {
+  it('switches month at midnight in Beijing', () => {
+    expect(beijingGiftMonth(new Date('2026-11-30T15:59:59Z'))).toBe('202611');
+    expect(beijingGiftMonth(new Date('2026-11-30T16:00:00Z'))).toBe('202612');
+  });
+
   it('includes the current month when it has no archive item yet', () => {
     const archiveItems = [
       { month: '202608', path: 'uploads/captaingift/202608_hash.jpg' },
@@ -38,17 +43,23 @@ describe('captaingift month options', () => {
   });
 
   it('fills missing months across a year boundary', () => {
-    expect(buildCaptaingiftMonthOptions([{ month: '202511' }], '202602')).toEqual([
-      '202602',
-      '202601',
-      '202512',
-      '202511'
+    expect(buildCaptaingiftMonthOptions([{ month: '202611' }], '202702')).toEqual([
+      '202702',
+      '202701',
+      '202612',
+      '202611'
     ]);
+  });
+
+  it('limits archive options and deep links to 2026 or later', () => {
+    expect(buildCaptaingiftMonthOptions([{month: '202504'}], '202602')).toEqual(['202602', '202601']);
+    expect(selectedGiftMonth('202512')).toBe(beijingGiftMonth());
+    expect(selectedGiftMonth('202601')).toBe('202601');
   });
 
   it('offers the current and previous month when there are no archives', () => {
     expect(buildCaptaingiftMonthOptions([], '202610')).toEqual(['202610', '202609']);
-    expect(buildCaptaingiftMonthOptions([], '202601')).toEqual(['202601', '202512']);
+    expect(buildCaptaingiftMonthOptions([], '202601')).toEqual(['202601']);
   });
 
   it('keeps the previous month selectable when only the current month has an archive', () => {

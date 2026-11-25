@@ -8,18 +8,16 @@ type CaptaingiftHeaderProps = {
   readonly selectedMonth: string;
   readonly monthOptions: readonly string[];
   readonly imageStatus: CaptaingiftImageStatus;
-  readonly statusMessage: string;
   readonly isDeleting: boolean;
   readonly isSubmitting: boolean;
   readonly onMonthChange: (month: string) => void;
-  readonly onDelete: () => void;
+  readonly onDelete: (trigger: HTMLButtonElement) => void;
 };
 
 export function CaptaingiftHeader({
   selectedMonth,
   monthOptions,
   imageStatus,
-  statusMessage,
   isDeleting,
   isSubmitting,
   onMonthChange,
@@ -45,7 +43,7 @@ export function CaptaingiftHeader({
           <button
             type="button"
             className="admin-captaingift-delete"
-            onClick={onDelete}
+            onClick={(e) => onDelete(e.currentTarget)}
             disabled={isDeleting || isSubmitting}
             aria-label={`删除 ${selectedMonth} 舰礼留档`}
           >
@@ -53,11 +51,6 @@ export function CaptaingiftHeader({
           </button>
         ) : null}
       </div>
-      {statusMessage ? (
-        <span className="admin-captaingift-status" role="status" aria-live="polite">
-          {statusMessage}
-        </span>
-      ) : null}
     </header>
   );
 }
@@ -65,9 +58,9 @@ export function CaptaingiftHeader({
 type CaptaingiftUploadProps = {
   readonly file: File | null;
   readonly isSubmitting: boolean;
-  readonly onFileSelection: (file: File) => void;
+  readonly onFileSelection: (file: File, trigger: HTMLElement) => void;
   readonly onFileRemove: () => void;
-  readonly onSubmit: () => void;
+  readonly onSubmit: (trigger: HTMLButtonElement) => void;
 };
 
 export function CaptaingiftUpload({
@@ -78,6 +71,7 @@ export function CaptaingiftUpload({
   onSubmit
 }: CaptaingiftUploadProps) {
   const fileInputRef = useRef<HTMLInputElement | null>(null);
+  const chooseButton = useRef<HTMLButtonElement>(null);
   const [isDragOver, setIsDragOver] = useState(false);
 
   return (
@@ -88,6 +82,7 @@ export function CaptaingiftUpload({
         <button
           type="button"
           className="admin-captaingift-upload-trigger"
+          ref={chooseButton}
           onClick={() => fileInputRef.current?.click()}
           onDragOver={(event) => {
             event.preventDefault();
@@ -99,7 +94,7 @@ export function CaptaingiftUpload({
             setIsDragOver(false);
             const droppedFile = event.dataTransfer.files[0];
             if (droppedFile) {
-              onFileSelection(droppedFile);
+              onFileSelection(droppedFile, event.currentTarget);
             }
           }}
         >
@@ -121,8 +116,8 @@ export function CaptaingiftUpload({
           accept="image/*"
           onChange={(event) => {
             const selectedFile = event.target.files?.[0];
-            if (selectedFile) {
-              onFileSelection(selectedFile);
+            if (selectedFile && chooseButton.current) {
+              onFileSelection(selectedFile, chooseButton.current);
             }
             event.target.value = '';
           }}
@@ -131,7 +126,7 @@ export function CaptaingiftUpload({
       <button
         type="button"
         className="admin-captaingift-submit"
-        onClick={onSubmit}
+        onClick={(e) => onSubmit(e.currentTarget)}
         disabled={isSubmitting}
       >
         提交

@@ -7,6 +7,12 @@ import {
 } from './use-admin-image-cache';
 
 describe('admin image URLs', () => {
+  it('uses the stored original for both animated previews', () => {
+    const path = 'uploads/original/42-original.gif';
+    expect(buildAdminImageUrl('thumb', path)).toBe('/api/admin-image/original/42-original.gif');
+    expect(buildAdminImageUrl('jpg', path)).toBe('/api/admin-image/original/42-original.gif');
+  });
+
   it('uses a pathname filename instead of query parameters', () => {
     expect(buildAdminImageUrl('thumb', 'uploads/thumbs/42-thumb.jpg')).toBe(
       '/api/admin-image/thumb/42-thumb.jpg'

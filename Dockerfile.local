@@ -1,0 +1,14 @@
+FROM node:26.13.1-bookworm-slim AS dependencies
+WORKDIR /srv/harei
+COPY package.json package-lock.json ./
+RUN npm ci --engine-strict --strict-peer-deps --no-audit --no-fund
+
+FROM dependencies AS app
+ENV NEXT_TELEMETRY_DISABLED=1
+COPY . .
+
+FROM app AS production-check
+RUN npm run build
+
+FROM app AS local
+CMD ["npm", "run", "dev", "--", "--hostname", "0.0.0.0", "--port", "3000"]

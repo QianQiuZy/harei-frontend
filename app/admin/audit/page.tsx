@@ -1,6 +1,7 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
+import { API_BASE_URL } from '@/lib/api-origin';
+import { useLegacyAdminToken } from '@/lib/auth/useLegacyAdminToken';
 import { useEffect, useMemo, useRef, useState } from 'react';
 import { BoxMessage } from '@/components/box/BoxMessage';
 import { useAdminImageCache } from '../use-admin-image-cache';
@@ -21,19 +22,11 @@ type BoxResponse = {
   items: BoxItem[];
 };
 
-type AuthResponse = {
-  code: number;
-  authenticated: boolean;
-};
-
 type MessageResponse = {
   code: number;
   message: string;
 };
 
-const API_HOST = 'https://api.harei.cn';
-const TOKEN_KEY = 'harei-admin-token';
-const TOKEN_EXPIRES_KEY = 'harei-admin-token-expires';
 const MIN_VIEWER_SCALE = 0.5;
 const MAX_VIEWER_SCALE = 5;
 const VIEWER_ZOOM_SENSITIVITY = 0.0015;
@@ -53,8 +46,7 @@ const formatDateTime = (value: string) => {
 };
 
 export default function AdminMessagePage() {
-  const router = useRouter();
-  const [token, setToken] = useState<string | null>(null);
+  const token = useLegacyAdminToken();
   const [items, setItems] = useState<BoxItem[]>([]);
   const [selectedId, setSelectedId] = useState<number | null>(null);
   const [readIds, setReadIds] = useState<Set<number>>(new Set());
@@ -78,44 +70,7 @@ export default function AdminMessagePage() {
   const [viewerOriginalSet, setViewerOriginalSet] = useState<Set<string>>(new Set());
   const previousSelectedRef = useRef<number | null>(null);
 
-  useEffect(() => {
-    const checkAuth = async () => {
-      const storedToken = localStorage.getItem(TOKEN_KEY);
-      const expiresAt = Number(localStorage.getItem(TOKEN_EXPIRES_KEY));
 
-      if (!storedToken || !expiresAt || Number.isNaN(expiresAt) || Date.now() > expiresAt) {
-        localStorage.removeItem(TOKEN_KEY);
-        localStorage.removeItem(TOKEN_EXPIRES_KEY);
-        router.replace('/login');
-        return;
-      }
-
-      try {
-        const response = await fetch(`${API_HOST}/auth`, {
-          headers: {
-            Authorization: `Bearer ${storedToken}`
-          }
-        });
-
-        if (!response.ok) {
-          throw new Error('auth failed');
-        }
-
-        const data = (await response.json()) as AuthResponse;
-        if (data.code !== 0 || !data.authenticated) {
-          throw new Error('auth failed');
-        }
-
-        setToken(storedToken);
-      } catch (error) {
-        localStorage.removeItem(TOKEN_KEY);
-        localStorage.removeItem(TOKEN_EXPIRES_KEY);
-        router.replace('/login');
-      }
-    };
-
-    checkAuth();
-  }, [router]);
 
   useEffect(() => {
     if (!token) {
@@ -125,7 +80,7 @@ export default function AdminMessagePage() {
     const fetchItems = async () => {
       setIsLoading(true);
       try {
-        const response = await fetch(`${API_HOST}/box/pending`, {
+        const response = await fetch(`${API_BASE_URL}/box/pending`, {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -219,7 +174,7 @@ export default function AdminMessagePage() {
       return;
     }
     try {
-      const response = await fetch(`${API_HOST}/box/delete`, {
+      const response = await fetch(`${API_BASE_URL}/box/delete`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -254,7 +209,7 @@ export default function AdminMessagePage() {
     }
     try {
       const hasTagFilter = Boolean(selectedTag);
-      const response = await fetch(`${API_HOST}/box/approve`, {
+      const response = await fetch(`${API_BASE_URL}/box/approve`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,

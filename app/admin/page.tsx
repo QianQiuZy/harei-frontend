@@ -1,5 +1,8 @@
 'use client';
 
+import { API_BASE_URL } from '@/lib/api-origin';
+import { request } from '@/lib/member';
+import { beijingGiftMonth } from '@/lib/captaingift-months';
 import Link from 'next/link';
 import { useEffect, useMemo, useState } from 'react';
 
@@ -25,19 +28,19 @@ type CountState = {
   captains: number | null;
 };
 
+type GiftSummary = {
+  archive: { month: string; uploaded: boolean };
+  collection: { month: string; collected: number; missing: number } | null;
+};
+
 const TOKEN_KEY = 'harei-admin-token';
 const TOKEN_EXPIRES_KEY = 'harei-admin-token-expires';
-const API_HOST = 'https://api.harei.cn';
 
 const getItemCount = (items: unknown[] | undefined) => (Array.isArray(items) ? items.length : 0);
 
-const formatMonth = (date: Date) => {
-  const year = date.getFullYear();
-  const month = String(date.getMonth() + 1).padStart(2, '0');
-  return `${year}${month}`;
-};
-
 export default function AdminPage() {
+  const [giftSummary, setGiftSummary] = useState<GiftSummary | null>(null);
+  const [giftStatus, setGiftStatus] = useState('加载中…');
   const [counts, setCounts] = useState<CountState>({
     pending: null,
     approved: null,
@@ -45,7 +48,7 @@ export default function AdminPage() {
     captains: null
   });
 
-  const currentMonth = useMemo(() => formatMonth(new Date()), []);
+  const currentMonth = useMemo(() => beijingGiftMonth(), []);
 
   useEffect(() => {
     const token = localStorage.getItem(TOKEN_KEY);
@@ -55,9 +58,18 @@ export default function AdminPage() {
       return;
     }
 
+    let active = true;
+    request<GiftSummary>('/admin/member-gifts/summary', undefined, 'GET', token)
+      .then((summary) => {
+        if (active) setGiftSummary(summary);
+      })
+      .catch(() => {
+        if (active) setGiftStatus('状态暂不可用');
+      });
+
     const fetchCounts = async () => {
       try {
-        const authResponse = await fetch(`${API_HOST}/auth`, {
+        const authResponse = await fetch(`${API_BASE_URL}/auth`, {
           headers: {
             Authorization: `Bearer ${token}`
           }
@@ -73,18 +85,18 @@ export default function AdminPage() {
         }
 
         const [pendingResponse, approvedResponse, tagResponse, captainResponse] = await Promise.all([
-          fetch(`${API_HOST}/box/approved`, {
+          fetch(`${API_BASE_URL}/box/approved`, {
             headers: {
               Authorization: `Bearer ${token}`
             }
           }),
-          fetch(`${API_HOST}/box/pending`, {
+          fetch(`${API_BASE_URL}/box/pending`, {
             headers: {
               Authorization: `Bearer ${token}`
             }
           }),
-          fetch(`${API_HOST}/tag/active`),
-          fetch(`${API_HOST}/captains?month=${currentMonth}`, {
+          fetch(`${API_BASE_URL}/tag/active`),
+          fetch(`${API_BASE_URL}/captains?month=${currentMonth}`, {
             headers: {
               Authorization: `Bearer ${token}`
             }
@@ -113,6 +125,9 @@ export default function AdminPage() {
     };
 
     fetchCounts();
+    return () => {
+      active = false;
+    };
   }, [currentMonth]);
 
   const pendingText =
@@ -126,9 +141,16 @@ export default function AdminPage() {
   const tagText = counts.tags === null ? '加载中...' : counts.tags === 0 ? '无活跃tag' : `${counts.tags}条活跃tag`;
   const captainText =
     counts.captains === null ? '加载中...' : `本月${counts.captains}条上舰记录`;
+  const collection = giftSummary?.collection;
+  const archiveText = giftSummary
+    ? giftSummary.archive.month + (giftSummary.archive.uploaded ? '已上传' : '未上传')
+    : giftStatus;
+  const collectionText = collection ? (
+    <>{collection.month} · <span>已收集{collection.collected}条，</span><span>{collection.missing}条未填写</span></>
+  ) : giftSummary ? '未开始地址收集' : giftStatus;
 
   return (
-    <section className="admin-page">
+    <section className="admin-page admin-home-page">
       <div className="admin-dashboard">
         <div className="admin-header">
           <h1 className="admin-title">后台管理</h1>
@@ -150,6 +172,17 @@ export default function AdminPage() {
           <Link className="admin-panel-card" href="/admin/captains">
             <div className="admin-panel-title">舰长列表</div>
             <div className="admin-panel-subtitle">{captainText}</div>
+          </Link>
+          <Link className="admin-panel-card" href="/admin/captaingift">
+            <div className="admin-panel-title">舰礼留档</div>
+            <div className="admin-panel-subtitle">{archiveText}</div>
+          </Link>
+          <Link
+            className="admin-panel-card"
+            href={collection ? `/admin/member-gifts?month=${collection.month}` : '/admin/member-gifts'}
+          >
+            <div className="admin-panel-title">地址管理</div>
+            <div className="admin-panel-subtitle">{collectionText}</div>
           </Link>
         </div>
       </div>

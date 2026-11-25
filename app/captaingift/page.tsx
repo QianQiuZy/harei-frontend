@@ -4,6 +4,7 @@ import Image from 'next/image';
 import { useEffect, useMemo, useState } from 'react';
 import { API_BASE_URL } from '@/lib/api';
 import { buildCaptaingiftImageUrl } from '@/lib/captaingift-image';
+import { isGiftMonth } from '@/lib/captaingift-months';
 
 type CaptaingiftItem = {
   month: string;
@@ -34,7 +35,7 @@ export default function CaptaingiftPage() {
         const data = (await response.json()) as CaptaingiftResponse;
         const items = Array.isArray(data.items) ? data.items : [];
         const sortedItems = items
-          .filter((item) => item.month)
+          .filter((item) => isGiftMonth(item.month))
           .sort((a, b) => b.month.localeCompare(a.month));
 
         if (isMounted) {

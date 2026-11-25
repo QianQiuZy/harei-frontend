@@ -32,10 +32,12 @@ describe('admin image pathname proxy', () => {
       'http://127.0.0.1:6555/box/image/jpg?path=uploads%2Fjpg%2F42-abcd-jpg.jpg',
       {
         cache: 'no-store',
+        redirect: 'error',
         headers: { Authorization: 'Bearer test-token' }
       }
     );
-    expect(response.headers.get('cache-control')).toBe('private, max-age=31536000, immutable');
+    expect(response.headers.get('cache-control')).toBe('private, no-store');
+    expect(response.headers.get('vary')).toBe('Authorization');
     expect(await response.text()).toBe('image-v1');
   });
 
@@ -56,6 +58,7 @@ describe('admin image pathname proxy', () => {
       'http://127.0.0.1:6555/box/image/thumb?path=uploads%2Fthumbs%2F2831-b5337078082a420eaa38033a0932e348-thumb.jpg',
       {
         cache: 'no-store',
+        redirect: 'error',
         headers: { Authorization: 'Bearer test-token' }
       }
     );

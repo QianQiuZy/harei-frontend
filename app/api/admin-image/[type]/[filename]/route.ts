@@ -1,8 +1,6 @@
 import { NextResponse } from 'next/server';
 import { SERVER_API_BASE_URL } from '@/lib/server-api';
 
-const CACHE_CONTROL_OK = 'private, max-age=31536000, immutable';
-
 const TYPE_MAP = {
   thumb: 'thumb',
   jpg: 'jpg',
@@ -36,6 +34,7 @@ export async function GET(
   try {
     const response = await fetch(targetUrl, {
       cache: 'no-store',
+      redirect: 'error',
       headers: {
         Authorization: `Bearer ${token}`
       }
@@ -43,9 +42,14 @@ export async function GET(
 
     const headers = new Headers();
     const contentType = response.headers.get('content-type');
+    if (response.ok && !/^image\/(?:jpeg|png|gif|webp|bmp|tiff|hei[cf])(?:;|$)/i.test(contentType ?? '')) {
+      await response.body?.cancel();
+      return NextResponse.json({ error: 'invalid image' }, { status: 502, headers: { 'Cache-Control': 'no-store' } });
+    }
     if (contentType) headers.set('Content-Type', contentType);
 
-    headers.set('Cache-Control', response.ok ? CACHE_CONTROL_OK : 'no-store');
+    headers.set('Cache-Control', 'private, no-store');
+    headers.set('Vary', 'Authorization');
 
     return new NextResponse(response.body, {
       status: response.status,

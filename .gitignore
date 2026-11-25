@@ -69,7 +69,8 @@ web_modules/
 .yarn-integrity
 
 # dotenv environment variable files
-.env
+# Public API mode defaults are part of the frontend.
+!.env
 .env.*
 !.env.example
 

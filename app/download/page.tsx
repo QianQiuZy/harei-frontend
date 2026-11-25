@@ -1,5 +1,7 @@
 'use client';
 
+import { API_BASE_URL } from '@/lib/api-origin';
+import { downloadLink } from '@/lib/download-link';
 import { useEffect, useState } from 'react';
 
 type DownloadItem = {
@@ -13,20 +15,6 @@ type DownloadResponse = {
   items: DownloadItem[];
 };
 
-const isExternalLink = (path: string) => /^https?:\/\//i.test(path);
-
-const getDownloadUrl = (downloadId: string) =>
-  `/api/download-file?download_id=${encodeURIComponent(downloadId)}`;
-
-const getDownloadId = (path: string) => {
-  try {
-    const url = new URL(path, 'https://api.harei.cn');
-    return url.searchParams.get('download_id');
-  } catch {
-    return null;
-  }
-};
-
 export default function DownloadPage() {
   const [items, setItems] = useState<DownloadItem[]>([]);
   const [isLoading, setIsLoading] = useState(true);
@@ -37,7 +25,7 @@ export default function DownloadPage() {
 
     const fetchDownloads = async () => {
       try {
-        const response = await fetch('https://api.harei.cn/download/active', {
+        const response = await fetch(`${API_BASE_URL}/download/active`, {
           cache: 'no-store'
         });
         if (!response.ok) {
@@ -67,26 +55,6 @@ export default function DownloadPage() {
     };
   }, []);
 
-  const handleDownload = (path: string) => {
-    const trimmedPath = path.trim();
-    if (!trimmedPath) {
-      return;
-    }
-
-    if (isExternalLink(trimmedPath)) {
-      window.open(trimmedPath, '_blank', 'noopener,noreferrer');
-      return;
-    }
-
-    const downloadId = getDownloadId(trimmedPath);
-    if (!downloadId) {
-      window.location.assign(trimmedPath);
-      return;
-    }
-
-    window.location.assign(getDownloadUrl(downloadId));
-  };
-
   return (
     <div className="download-page">
       <div className="download-box">
@@ -107,18 +75,26 @@ export default function DownloadPage() {
           <div className="download-state">暂无可下载资源</div>
         ) : (
           <div className="download-list">
-            {items.map((item) => (
-              <div key={item.download_id} className="download-item">
-                <span className="download-item-name">{item.description}</span>
-                <button
-                  type="button"
-                  className="download-item-button"
-                  onClick={() => handleDownload(item.path)}
-                >
-                  下载
-                </button>
-              </div>
-            ))}
+            {items.map((item) => {
+              const link = downloadLink(item.path);
+              return (
+                <div key={item.download_id} className="download-item">
+                  <span className="download-item-name">{item.description}</span>
+                  <button
+                    type="button"
+                    className="download-item-button"
+                    disabled={!link}
+                    title={link ? undefined : '下载地址无效'}
+                    onClick={() => {
+                      if (link?.external) window.open(link.href, '_blank', 'noopener,noreferrer');
+                      else if (link) window.location.assign(link.href);
+                    }}
+                  >
+                    下载
+                  </button>
+                </div>
+              );
+            })}
           </div>
         )}
       </div>

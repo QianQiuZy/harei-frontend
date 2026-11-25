@@ -1,0 +1,29 @@
+.toast {
+  position: fixed;
+  inset: auto;
+  visibility: hidden;
+  z-index: 100;
+  width: max-content;
+  max-width: min(34rem, var(--notice-viewport-width, calc(100vw - 16px)));
+  max-height: 35dvh;
+  margin: 0;
+  padding: 10px 18px;
+  overflow: auto;
+  overflow-wrap: anywhere;
+  border: 1px solid #42575b;
+  border-radius: 12px;
+  background: #25383b;
+  color: white;
+  box-shadow: 0 6px 24px rgb(15 23 42 / 24%);
+  font-size: 0.9375rem;
+  line-height: 1.5;
+  text-align: start;
+}
+.toast[role='alert'] {
+  border-color: #925163;
+  background: #712f42;
+}
+.toast::backdrop {
+  background: transparent;
+  pointer-events: none;
+}

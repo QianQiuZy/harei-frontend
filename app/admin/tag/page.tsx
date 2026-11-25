@@ -1,5 +1,6 @@
 'use client';
 
+import { API_BASE_URL } from '@/lib/api-origin';
 import { useEffect, useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { useLegacyAdminToken } from '@/lib/auth/useLegacyAdminToken';
@@ -14,10 +15,9 @@ type MessageResponse = {
   message: string;
 };
 
-const API_HOST = 'https://api.harei.cn';
 
 const fetchTags = async () => {
-  const response = await fetch(`${API_HOST}/tag/active`);
+  const response = await fetch(`${API_BASE_URL}/tag/active`);
   if (!response.ok) throw new Error('fetch failed');
   const data = (await response.json()) as TagResponse;
   if (data.code !== 0) throw new Error('fetch failed');
@@ -63,7 +63,7 @@ export default function AdminTagPage() {
     setIsSubmitting(true);
     setStatusMessage('');
     try {
-      const response = await fetch(`${API_HOST}/tag/add`, {
+      const response = await fetch(`${API_BASE_URL}/tag/add`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,
@@ -96,7 +96,7 @@ export default function AdminTagPage() {
     setIsSubmitting(true);
     setStatusMessage('');
     try {
-      const response = await fetch(`${API_HOST}/tag/archived`, {
+      const response = await fetch(`${API_BASE_URL}/tag/archived`, {
         method: 'POST',
         headers: {
           Authorization: `Bearer ${token}`,

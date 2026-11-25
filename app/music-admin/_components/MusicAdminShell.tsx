@@ -51,7 +51,7 @@ export const MusicAdminShell = ({
               </Link>
             );
           })}
-          <Link href="/music" target="_blank">
+          <Link href="/music" target="_blank" rel="noopener noreferrer">
             <ExternalLink aria-hidden="true" size={17} />
             公开歌单
           </Link>

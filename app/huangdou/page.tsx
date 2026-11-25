@@ -1,5 +1,6 @@
 'use client';
 
+import { API_BASE_URL } from '@/lib/api-origin';
 import { useEffect, useMemo, useState } from 'react';
 
 type HuangdouRankItem = {
@@ -41,7 +42,7 @@ export default function HuangdouPage() {
 
     const fetchRank = async () => {
       try {
-        const response = await fetch('https://api.harei.cn/huangdou/rank', {
+        const response = await fetch(`${API_BASE_URL}/huangdou/rank`, {
           cache: 'no-store'
         });
         if (!response.ok) {
@@ -90,7 +91,7 @@ export default function HuangdouPage() {
 
     try {
       const response = await fetch(
-        `https://api.harei.cn/huangdou/uid?uid=${encodeURIComponent(uidInput)}`,
+        `${API_BASE_URL}/huangdou/uid?uid=${encodeURIComponent(uidInput)}`,
         { cache: 'no-store' }
       );
 

@@ -124,13 +124,13 @@ export const login = async (
   password: string
 ): Promise<SessionResponse> => {
   const path = kind === 'admin' ? 'login' : 'music-manage/login';
-  const payload = await apiClient.post(path, { json: { username, password } }).json<unknown>();
+  const payload = await apiClient.post(path, { json: { username, password }, redirect: 'error', cache: 'no-store' }).json<unknown>();
   return parseSessionResponse(payload);
 };
 
 export const verifySession = async (token: string): Promise<SessionResponse> => {
   const payload = await apiClient
-    .get('auth', { headers: { Authorization: `Bearer ${token}` } })
+    .get('auth', { headers: { Authorization: `Bearer ${token}` }, cache: 'no-store', redirect: 'error' })
     .json<unknown>();
   return parseSessionResponse(payload);
 };

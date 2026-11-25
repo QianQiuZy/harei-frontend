@@ -1,5 +1,6 @@
 'use client';
 
+import { API_BASE_URL } from '@/lib/api-origin';
 import { useEffect, useRef, useState } from 'react';
 import { createBirthdayFireworks } from '@/components/background/createBirthdayFireworks';
 import { useHydrated } from '@/lib/use-hydrated';
@@ -82,7 +83,7 @@ export default function HomePage() {
 
     const fetchStatus = async () => {
       try {
-        const response = await fetch('https://api.harei.cn/live/status', { cache: 'no-store' });
+        const response = await fetch(`${API_BASE_URL}/live/status`, { cache: 'no-store' });
         if (!response.ok) {
           throw new Error('live status failed');
         }
@@ -231,9 +232,9 @@ export default function HomePage() {
           <img src="/images/icon/box-l.png" alt="提问箱" className="home-link-icon" />
           <span>提问箱</span>
         </a>
-        <a className="home-link" href="/huangdou">
-          <img src="/images/icon/huangdou.png" alt="豆力榜" className="home-link-icon" />
-          <span>豆力榜</span>
+        <a className="home-link" href="/personal?section=address">
+          <img src="/images/icon/gift-address-l.png" alt="" className="home-link-icon" />
+          <span>舰礼地址填写</span>
         </a>
       </div>
       <div className="home-random-text">{randomText}</div>

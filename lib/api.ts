@@ -1,9 +1,8 @@
 import ky from 'ky';
 
-export const API_BASE_URL = (process.env.NEXT_PUBLIC_API_BASE_URL ?? 'https://api.harei.cn').replace(
-  /\/+$/,
-  ''
-);
+import { API_BASE_URL } from './api-origin';
+
+export { API_BASE_URL };
 
 export const apiClient = ky.create({
   prefix: `${API_BASE_URL}/`,

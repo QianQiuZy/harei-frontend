@@ -28,11 +28,14 @@ type UseAdminImageCacheOptions = {
 };
 
 export const buildAdminImageUrl = (type: AdminImageType, path: string) => {
-  const filename = path.split(/[\\/]/).pop() ?? '';
-  return `/api/admin-image/${type}/${encodeURIComponent(filename)}`;
+  const segments = path.split(/[\\/]/);
+  const filename = segments.pop() ?? '';
+  // Animated images reuse the original file for both previews.
+  const storedType = segments.pop() === 'original' ? 'original' : type;
+  return `/api/admin-image/${storedType}/${encodeURIComponent(filename)}`;
 };
 
-const getCacheKey = (type: AdminImageType, path: string) => `${type}:${path}`;
+const getCacheKey = (token: string, type: AdminImageType, path: string) => `${token}:${type}:${path}`;
 
 export async function preloadAdminImages(
   items: readonly AdminImagePreloadItem[],
@@ -69,7 +72,7 @@ export function useAdminImageCache({
   const imageCacheRef = useRef<Map<string, string>>(new Map());
   const imageLoadingRef = useRef<Map<string, ImageRequest>>(new Map());
   const activePreloadRef = useRef<AbortController | null>(null);
-  const mountedRef = useRef(true);
+  const generationRef = useRef(0);
 
   const loadImage = useCallback(
     async (type: AdminImageType, path: string, signal?: AbortSignal): Promise<boolean> => {
@@ -77,7 +80,8 @@ export function useAdminImageCache({
         return false;
       }
 
-      const key = getCacheKey(type, path);
+      const key = getCacheKey(token, type, path);
+      const generation = generationRef.current;
       if (imageCacheRef.current.has(key)) {
         return true;
       }
@@ -94,6 +98,7 @@ export function useAdminImageCache({
       const request = (async () => {
         try {
           const response = await fetch(buildAdminImageUrl(type, path), {
+            cache: 'no-store',
             headers: {
               Authorization: `Bearer ${token}`
             },
@@ -104,7 +109,7 @@ export function useAdminImageCache({
           }
 
           const objectUrl = URL.createObjectURL(await response.blob());
-          if (signal?.aborted || !mountedRef.current) {
+          if (signal?.aborted || generation !== generationRef.current) {
             URL.revokeObjectURL(objectUrl);
             return false;
           }
@@ -141,8 +146,8 @@ export function useAdminImageCache({
   );
 
   const getCachedImageUrl = useCallback(
-    (type: AdminImageType, path: string) => imageCacheRef.current.get(getCacheKey(type, path)),
-    []
+    (type: AdminImageType, path: string) => token ? imageCacheRef.current.get(getCacheKey(token, type, path)) : undefined,
+    [token]
   );
 
   const cacheImage = useCallback(
@@ -177,7 +182,7 @@ export function useAdminImageCache({
     const imageLoading = imageLoadingRef.current;
 
     return () => {
-      mountedRef.current = false;
+      generationRef.current += 1;
       activePreloadRef.current?.abort();
       imageCache.forEach((url) => {
         URL.revokeObjectURL(url);
@@ -185,7 +190,7 @@ export function useAdminImageCache({
       imageCache.clear();
       imageLoading.clear();
     };
-  }, []);
+  }, [token]);
 
   return { cacheImage, getCachedImageUrl };
 }

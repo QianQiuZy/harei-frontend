@@ -1,3 +1,4 @@
+import { resolveApiLink } from '@/lib/api-origin';
 import { useEffect, useRef } from 'react';
 import { ExternalLink, X } from 'lucide-react';
 import type { SongDetailResponse } from '@/lib/music/schemas';
@@ -77,7 +78,7 @@ export const SongDialog = ({ open, loading, detail, error, onClose }: SongDialog
                       <span>{performance.stream.title ?? '直播记录'}</span>
                     </div>
                     {performance.clipUrl ? (
-                      <a href={performance.clipUrl} target="_blank" rel="noreferrer noopener">
+                      <a href={resolveApiLink(performance.clipUrl)} target="_blank" rel="noreferrer noopener">
                         听歌切
                         <ExternalLink aria-hidden="true" size={14} />
                       </a>

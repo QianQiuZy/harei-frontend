@@ -1,4 +1,3 @@
-@import url('https://fontsapi.zeoseven.com/320/main/result.css');
 @import 'tailwindcss';
 @config '../tailwind.config.js';
 
@@ -235,6 +234,7 @@ a {
 }
 
 .app-main {
+  --page-top-offset: -48px;
   flex: 1;
   padding: 88px 40px 64px;
 }
@@ -797,7 +797,7 @@ a {
   display: flex;
   justify-content: center;
   min-height: calc(100vh - 152px);
-  margin-top: -48px;
+  margin-top: var(--page-top-offset);
 }
 
 .captaingift-page {
@@ -1577,6 +1577,23 @@ a {
   display: flex;
   flex-direction: column;
   gap: 24px;
+}
+
+.admin-home-page {
+  margin-top: var(--page-top-offset);
+  padding-top: 0;
+}
+
+.admin-dashboard .admin-panel-subtitle span {
+  display: inline-block;
+  max-width: 100%;
+  overflow-wrap: anywhere;
+}
+
+@media (max-width: 360px) {
+  .admin-dashboard .admin-grid {
+    grid-template-columns: 1fr;
+  }
 }
 
 .admin-header {
@@ -2518,6 +2535,24 @@ a {
 }
 
 @media (max-width: 640px) {
+  .admin-home-page {
+    width: 90%;
+    margin-inline: auto;
+    padding-inline: 0;
+  }
+
+  .admin-dashboard, .admin-dashboard .admin-grid {
+    gap: 12px;
+  }
+
+  .admin-dashboard .admin-header,
+  .admin-dashboard .admin-panel-card {
+    padding: 16px;
+  }
+
+  .admin-dashboard .admin-panel-card {
+    gap: 8px;
+  }
   .sidebar {
     width: min(200px, 70vw);
     padding: 16px 14px;

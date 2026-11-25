@@ -28,7 +28,7 @@ describe('captaingift image cache validation', () => {
     expect(response.status).toBe(200);
     expect(fetchMock).toHaveBeenCalledWith(
       'http://127.0.0.1:6555/captaingift/image?path=uploads%2Fcaptaingift%2F202608_e30b54b7c3d58a1d32f6e03b8f15a2e678771ad82ef4908719b4eaf214e81ce2.jpg',
-      { cache: 'no-store' }
+      { cache: 'no-store', redirect: 'error' }
     );
     expect(response.headers.get('cache-control')).toBe('public, max-age=31536000, immutable');
     expect(await response.text()).toBe('image-v1');

@@ -4,6 +4,7 @@ import { usePathname } from "next/navigation";
 import type { ReactNode } from "react";
 import { BackgroundSlideshow } from "@/components/background/BackgroundSlideshow";
 import { Sidebar } from "@/components/Sidebar";
+import { ActionFeedbackProvider } from "@/components/member/ActionFeedback";
 
 const LOGIN_PATH = "/login";
 
@@ -18,7 +19,7 @@ export const AppShell = ({ children }: AppShellProps) => {
 	const usesStandaloneShell = isLogin || isMusicAdmin;
 
 	return (
-		<>
+		<ActionFeedbackProvider>
 			{!usesStandaloneShell ? <BackgroundSlideshow /> : null}
 			<div className={usesStandaloneShell ? "login-shell" : "app-shell"}>
 				{!usesStandaloneShell ? <Sidebar /> : null}
@@ -28,6 +29,6 @@ export const AppShell = ({ children }: AppShellProps) => {
 					<main className="app-main">{children}</main>
 				)}
 			</div>
-		</>
+		</ActionFeedbackProvider>
 	);
 };
