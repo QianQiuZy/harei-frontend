@@ -1,5 +1,5 @@
 import { ArrowLeft } from "lucide-react";
-import Link from "next/link";
+import DocumentLink from '@/components/DocumentLink';
 import type { ManagedSongDetail } from "@/lib/music-admin/schemas";
 import styles from "../form.module.css";
 
@@ -14,10 +14,10 @@ export const SongEditorHeader = ({
 }) => (
 	<header className={styles.heading}>
 		<div>
-			<Link href="/music-admin/songs">
+			<DocumentLink href="/music-admin/songs">
 				<ArrowLeft size={16} />
 				返回歌曲列表
-			</Link>
+			</DocumentLink>
 			<p>SONG EDITOR</p>
 			<h1>{songId ? title || "编辑歌曲" : "新增歌曲"}</h1>
 		</div>

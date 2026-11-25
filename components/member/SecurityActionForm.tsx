@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { ApiError, onMemberSessionChange, personalQuery, request, type SecurityAction } from '@/lib/member';
 import { ActionForm, CurrentPasswordField, errorText, Field, Panel, s, value } from './MemberUI';
 import { MemberDialog } from './MemberDialog';
@@ -158,7 +157,6 @@ function DeleteAccount({ email, done }: { email: string; done: () => void }) {
 }
 
 export default function SecurityActionForm({ mode }: { mode: SecurityAction }) {
-  const router = useRouter();
   const [email, setEmail] = useState('');
   const [error, setError] = useState('');
   const [revision, setRevision] = useState(0);
@@ -179,13 +177,13 @@ export default function SecurityActionForm({ mode }: { mode: SecurityAction }) {
         if (!active) return;
         if (err instanceof ApiError && err.status === 401) {
           setEmail('');
-          router.replace('/account/login' + personalQuery(undefined, mode));
+          window.location.replace('/account/login' + personalQuery(undefined, mode));
         } else setError(errorText(err));
       });
     return () => {
       active = false;
     };
-  }, [router, mode, revision]);
+  }, [mode, revision]);
   if (error)
     return (
       <p role="alert">
@@ -195,10 +193,10 @@ export default function SecurityActionForm({ mode }: { mode: SecurityAction }) {
   if (!email) return <p className={s.empty}>正在读取账号…</p>;
   if (mode === 'change-email')
     return (
-      <ChangeEmail key={email} email={email} done={() => router.replace('/account/login?section=security')} />
+      <ChangeEmail key={email} email={email} done={() => window.location.replace('/account/login?section=security')} />
     );
   if (mode === 'delete-account')
-    return <DeleteAccount key={email} email={email} done={() => router.replace('/account/login')} />;
+    return <DeleteAccount key={email} email={email} done={() => window.location.replace('/account/login')} />;
   return (
     <ActionForm
       submit="保存新密码"
@@ -207,7 +205,7 @@ export default function SecurityActionForm({ mode }: { mode: SecurityAction }) {
           password: value(data, 'password'),
           new_password: value(data, 'new_password')
         });
-        router.replace('/account/login?section=security');
+        window.location.replace('/account/login?section=security');
       }}
     >
       <CurrentPasswordField />

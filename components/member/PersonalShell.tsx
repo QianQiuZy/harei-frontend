@@ -1,8 +1,8 @@
 'use client';
 
 import Image from 'next/image';
-import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import DocumentLink from '@/components/DocumentLink';
+import { usePathname } from 'next/navigation';
 import { Fragment, useCallback, useEffect, useState, type ReactNode } from 'react';
 import { ApiError, onMemberSessionChange, request, type Profile } from '@/lib/member';
 import { ActionForm, errorText, s } from './MemberUI';
@@ -15,7 +15,6 @@ type Props = {
 };
 
 export default function PersonalShell({ title, loginQuery, children, watchGifts = false }: Props) {
-  const router = useRouter();
   const pathname = usePathname();
   const [profile, setProfile] = useState<Profile | null>(null);
   const [error, setError] = useState('');
@@ -48,7 +47,7 @@ export default function PersonalShell({ title, loginQuery, children, watchGifts 
         if (!active) return;
         if (err instanceof ApiError && err.status === 401) {
           setProfile(null);
-          router.replace('/account/login' + loginQuery);
+          window.location.replace('/account/login' + loginQuery);
           return;
         }
         setError(errorText(err));
@@ -66,7 +65,7 @@ export default function PersonalShell({ title, loginQuery, children, watchGifts 
       clearTimeout(timer);
       document.removeEventListener('visibilitychange', onVisible);
     };
-  }, [revision, router, loginQuery, watchGifts, reload]);
+  }, [revision, loginQuery, watchGifts, reload]);
   return (
     <div className={`${s.page} ${s.workspace} ${s.personal}`}>
       <header className={`${s.workspaceHeader} ${s.personalHeader}`}>
@@ -85,7 +84,7 @@ export default function PersonalShell({ title, loginQuery, children, watchGifts 
                 await request('/user-auth/logout', {});
                 setProfile(null);
                 sessionStorage.removeItem('harei-binding-flow:' + profile.email);
-                router.replace('/account/login');
+                window.location.replace('/account/login');
               }}
             />
             <nav className={s.personalActions} aria-label="个人中心导航">
@@ -94,14 +93,14 @@ export default function PersonalShell({ title, loginQuery, children, watchGifts 
                 ['/personal/bindings', 'UID绑定'],
                 ['/personal/security', '账号安全']
               ].map(([href, label]) => (
-                <Link
+                <DocumentLink
                   key={href}
                   className={s.personalButton}
                   href={href}
                   aria-current={pathname === href ? 'page' : undefined}
                 >
                   {label}
-                </Link>
+                </DocumentLink>
               ))}
             </nav>
           </>

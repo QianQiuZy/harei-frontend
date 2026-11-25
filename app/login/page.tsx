@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { submitAnchor, useActionFeedback } from '@/components/member/ActionFeedback';
 import { HTTPError } from 'ky';
 import { useHydrated } from '@/lib/use-hydrated';
@@ -14,7 +13,6 @@ import {
 } from '@/lib/auth/session';
 
 export default function LoginPage() {
-  const router = useRouter();
   const hydrated = useHydrated();
   const [isSubmitting, setIsSubmitting] = useState(false);
   const setMessage = useActionFeedback();
@@ -24,10 +22,10 @@ export default function LoginPage() {
     if (!stored) return;
     void verifySession(stored.session.token)
       .then((session) => {
-        if (session.scopes.includes(ADMIN_SCOPE)) router.replace('/admin');
+        if (session.scopes.includes(ADMIN_SCOPE)) window.location.replace('/admin');
       })
       .catch(() => undefined);
-  }, [router]);
+  }, []);
 
   const submit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -45,7 +43,7 @@ export default function LoginPage() {
       const response = await login('admin', username, password);
       if (!response.scopes.includes(ADMIN_SCOPE)) throw new Error('账号没有后台权限');
       saveSession('admin', response, window.localStorage);
-      router.replace('/admin');
+      window.location.replace('/admin');
     } catch (error) {
       if (error instanceof HTTPError && error.response.status === 401) {
         setMessage({ text: '用户名或密码错误。', error: true, anchor });

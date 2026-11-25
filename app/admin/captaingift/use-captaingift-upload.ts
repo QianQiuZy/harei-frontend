@@ -1,7 +1,6 @@
 'use client';
 
 import { API_BASE_URL } from '@/lib/api-origin';
-import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useLegacyAdminToken } from '@/lib/auth/useLegacyAdminToken';
 import { feedbackAnchor, useActionFeedback } from '@/components/member/ActionFeedback';
@@ -38,7 +37,6 @@ export function useCaptaingiftUpload({
   onArchiveChange,
   selectedMonth
 }: CaptaingiftUploadState) {
-  const router = useRouter();
   const token = useLegacyAdminToken();
   const setFeedback = useActionFeedback();
   const [file, setFile] = useState<File | null>(null);
@@ -62,7 +60,7 @@ export function useCaptaingiftUpload({
     }
 
     if (!token) {
-      router.replace('/login');
+      window.location.replace('/login');
       return;
     }
 

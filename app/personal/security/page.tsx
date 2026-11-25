@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import DocumentLink from '@/components/DocumentLink';
 import { personalQuery } from '@/lib/member';
 import { Panel, s } from '@/components/member/MemberUI';
 import PersonalShell from '@/components/member/PersonalShell';
@@ -17,10 +17,10 @@ export default function SecurityPage() {
               ['/account/delete-account', '注销账号'],
               ['/account/appeal?section=security', '账号申诉']
             ].map(([href, label]) => (
-              <Link key={href} href={href}>
+              <DocumentLink key={href} href={href}>
                 {label}
                 <span aria-hidden="true">›</span>
-              </Link>
+              </DocumentLink>
             ))}
           </nav>
         </Panel>

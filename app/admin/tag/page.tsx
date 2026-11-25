@@ -2,7 +2,6 @@
 
 import { API_BASE_URL } from '@/lib/api-origin';
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { useLegacyAdminToken } from '@/lib/auth/useLegacyAdminToken';
 
 type TagResponse = {
@@ -25,7 +24,6 @@ const fetchTags = async () => {
 };
 
 export default function AdminTagPage() {
-  const router = useRouter();
   const token = useLegacyAdminToken();
   const [tags, setTags] = useState<string[]>([]);
   const [tagInput, setTagInput] = useState('');
@@ -57,7 +55,7 @@ export default function AdminTagPage() {
       return;
     }
     if (!token) {
-      router.replace('/login');
+      window.location.replace('/login');
       return;
     }
     setIsSubmitting(true);
@@ -90,7 +88,7 @@ export default function AdminTagPage() {
 
   const handleArchive = async (tagName: string) => {
     if (!token) {
-      router.replace('/login');
+      window.location.replace('/login');
       return;
     }
     setIsSubmitting(true);

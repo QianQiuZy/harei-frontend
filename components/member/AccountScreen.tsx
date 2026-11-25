@@ -1,8 +1,7 @@
 'use client';
 
-import Link from 'next/link';
+import DocumentLink from '@/components/DocumentLink';
 import Image from 'next/image';
-import { useRouter } from 'next/navigation';
 import { useCallback, useState } from 'react';
 import { useHydrated } from '@/lib/use-hydrated';
 import { isSecurityAction, personalDestination, request, type SecurityAction } from '@/lib/member';
@@ -54,18 +53,18 @@ export default function AccountScreen({
       </header>
       {!standalone && (
         <nav className={s.authNav} aria-label="个人账号">
-          <Link
+          <DocumentLink
             href={'/account/login' + query}
             aria-current={mode === 'login' ? 'page' : undefined}
           >
             登录
-          </Link>
-          <Link
+          </DocumentLink>
+          <DocumentLink
             href={'/account/register' + query}
             aria-current={mode === 'register' ? 'page' : undefined}
           >
             注册
-          </Link>
+          </DocumentLink>
         </nav>
       )}
       {hydrated &&
@@ -77,20 +76,20 @@ export default function AccountScreen({
       {standalone ? (
         <nav className={s.authHelp} aria-label="返回">
           {security || new URLSearchParams(query).get('section') === 'security' ? (
-            <Link href="/personal/security">返回账号安全</Link>
+            <DocumentLink href="/personal/security">返回账号安全</DocumentLink>
           ) : (
-            <Link href="/">返回首页</Link>
+            <DocumentLink href="/">返回首页</DocumentLink>
           )}
         </nav>
       ) : (
         <nav className={s.authHelp} aria-label="账号帮助">
-          <Link
+          <DocumentLink
             href={'/account/forgot-password' + query}
             aria-current={mode === 'forgot-password' ? 'page' : undefined}
           >
             找回密码
-          </Link>
-          <Link href={'/account/appeal' + query}>账号申诉</Link>
+          </DocumentLink>
+          <DocumentLink href={'/account/appeal' + query}>账号申诉</DocumentLink>
         </nav>
       )}
     </div>
@@ -98,7 +97,6 @@ export default function AccountScreen({
 }
 
 function AccountBody({ mode, query }: { mode: Mode; query: string }) {
-  const router = useRouter();
   const [email, setEmail] = useState('');
   const [flow, setFlow] = useState(() =>
     mode === 'register' ? sessionStorage.getItem(registrationKey) : null
@@ -122,7 +120,7 @@ function AccountBody({ mode, query }: { mode: Mode; query: string }) {
             identifier: value(data, 'identifier'),
             password: value(data, 'password')
           });
-          router.replace(personalDestination(query));
+          window.location.replace(personalDestination(query));
         }}
       >
         <Field
@@ -194,7 +192,7 @@ function AccountBody({ mode, query }: { mode: Mode; query: string }) {
           onExpired={expireFlow}
           done={() => {
             sessionStorage.removeItem(registrationKey);
-            router.replace(personalDestination(query));
+            window.location.replace(personalDestination(query));
           }}
         />
       </Panel>
@@ -240,7 +238,7 @@ function AccountBody({ mode, query }: { mode: Mode; query: string }) {
               code,
               password: value(data, 'password')
             });
-            router.replace('/account/login' + query);
+            window.location.replace('/account/login' + query);
           }
         }}
       >

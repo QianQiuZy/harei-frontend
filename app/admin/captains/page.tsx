@@ -3,7 +3,6 @@
 import { API_BASE_URL } from '@/lib/api-origin';
 import { beijingGiftMonth } from '@/lib/captaingift-months';
 import { useEffect, useMemo, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { useLegacyAdminToken } from '@/lib/auth/useLegacyAdminToken';
 
 type CaptainItem = {
@@ -68,7 +67,6 @@ const formatDateTime = (value: string) => {
 };
 
 export default function AdminCaptainsPage() {
-  const router = useRouter();
   const token = useLegacyAdminToken();
   const [items, setItems] = useState<CaptainItem[]>([]);
   const [statusMessage, setStatusMessage] = useState('');
@@ -140,7 +138,7 @@ export default function AdminCaptainsPage() {
 
   const handleDownload = async () => {
     if (!token) {
-      router.replace('/login');
+      window.location.replace('/login');
       return;
     }
 

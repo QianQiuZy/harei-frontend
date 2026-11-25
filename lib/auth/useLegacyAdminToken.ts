@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useSyncExternalStore } from 'react';
-import { useRouter } from 'next/navigation';
 
 const TOKEN_KEY = 'harei-admin-token';
 const EXPIRES_KEY = 'harei-admin-token-expires';
@@ -19,15 +18,14 @@ const subscribe = (onChange: () => void) => {
 };
 
 export const useLegacyAdminToken = () => {
-  const router = useRouter();
   const token = useSyncExternalStore(subscribe, getSnapshot, getServerSnapshot);
 
   useEffect(() => {
     if (getSnapshot()) return;
     localStorage.removeItem(TOKEN_KEY);
     localStorage.removeItem(EXPIRES_KEY);
-    router.replace('/login');
-  }, [router, token]);
+    window.location.replace('/login');
+  }, [token]);
 
   return token;
 };

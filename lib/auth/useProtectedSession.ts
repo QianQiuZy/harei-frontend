@@ -1,7 +1,6 @@
 'use client';
 
 import { useEffect, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { HTTPError } from 'ky';
 import {
   clearSession,
@@ -22,7 +21,6 @@ export const useProtectedSession = (
   requiredScope: RequiredScope,
   loginPath: string
 ): ProtectedSessionState => {
-  const router = useRouter();
   const [state, setState] = useState<ProtectedSessionState>({ status: 'loading' });
 
   useEffect(() => {
@@ -34,7 +32,7 @@ export const useProtectedSession = (
       const selected = selectSession(requiredScope, window.localStorage);
       if (!selected) {
         setState({ status: 'denied' });
-        router.replace(loginPath);
+        window.location.replace(loginPath);
         return;
       }
       setState({ status: 'loading' });
@@ -67,7 +65,7 @@ export const useProtectedSession = (
       active = false;
       window.removeEventListener('storage', onStorage);
     };
-  }, [loginPath, requiredScope, router]);
+  }, [loginPath, requiredScope]);
 
   return state;
 };

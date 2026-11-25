@@ -1,6 +1,6 @@
 'use client';
 
-import Link from 'next/link';
+import DocumentLink from '@/components/DocumentLink';
 import { useCallback, useRef, useState } from 'react';
 import { personalQuery, request, type Profile } from '@/lib/member';
 import { ActionForm, CurrentPasswordField, Panel, s, value } from '@/components/member/MemberUI';
@@ -78,12 +78,12 @@ function BoundUID({
         </button>
       </div>
       {multiple && (
-        <Link
+        <DocumentLink
           className={s.uidAddressLink}
           href={'/personal' + personalQuery(binding.uid, 'address') + '#address-' + binding.uid}
         >
           管理此 UID 的地址
-        </Link>
+        </DocumentLink>
       )}
       {removing && (
         <MemberDialog

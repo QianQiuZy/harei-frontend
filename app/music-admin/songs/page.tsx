@@ -1,7 +1,7 @@
 'use client';
 
 import { Archive, ChevronLeft, ChevronRight, Download, Plus, Search, Upload } from 'lucide-react';
-import Link from 'next/link';
+import DocumentLink from '@/components/DocumentLink';
 import { useEffect, useState } from 'react';
 import { useMusicAdminSession } from '@/app/music-admin/_components/SessionContext';
 import {
@@ -88,7 +88,7 @@ export default function ManagedSongsPage() {
             <Upload size={17} />{importing ? '导入中…' : '导入演唱记录'}
             <input className={styles.srOnly} type="file" accept=".xlsx,application/vnd.openxmlformats-officedocument.spreadsheetml.sheet" disabled={importing} onChange={(event) => void uploadWorkbook(event)} />
           </label>
-          <Link className={styles.primaryAction} href="/music-admin/songs/new"><Plus size={17} />新增歌曲</Link>
+          <DocumentLink className={styles.primaryAction} href="/music-admin/songs/new"><Plus size={17} />新增歌曲</DocumentLink>
         </div>
       </header>
       <div className={styles.toolbar}>
@@ -108,7 +108,7 @@ export default function ManagedSongsPage() {
                 <td data-label="来源键"><code>{song.source_key}</code></td>
                 <td data-label="状态"><span className={song.status === 'active' ? styles.activeBadge : styles.archivedBadge}>{song.status === 'active' ? '公开' : '归档'}</span></td>
                 <td data-label="版本">{song.version}</td>
-                <td data-label="操作"><Link href={`/music-admin/songs/${song.song_id}`}>编辑</Link></td>
+                <td data-label="操作"><DocumentLink href={`/music-admin/songs/${song.song_id}`}>编辑</DocumentLink></td>
               </tr>
             ))}
           </tbody>

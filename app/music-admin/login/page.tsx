@@ -1,12 +1,10 @@
 'use client';
 
-import { useRouter } from 'next/navigation';
 import { useEffect, useState } from 'react';
 import { login, MUSIC_SCOPE, saveSession, selectSession, verifySession } from '@/lib/auth/session';
 import styles from '../admin.module.css';
 
 export default function MusicAdminLoginPage() {
-  const router = useRouter();
   const [username, setUsername] = useState('');
   const [password, setPassword] = useState('');
   const [submitting, setSubmitting] = useState(false);
@@ -17,10 +15,10 @@ export default function MusicAdminLoginPage() {
     if (!selected) return;
     void verifySession(selected.session.token)
       .then((session) => {
-        if (session.scopes.includes(MUSIC_SCOPE)) router.replace('/music-admin');
+        if (session.scopes.includes(MUSIC_SCOPE)) window.location.replace('/music-admin');
       })
       .catch(() => undefined);
-  }, [router]);
+  }, []);
 
   const submit = async (event: React.FormEvent<HTMLFormElement>) => {
     event.preventDefault();
@@ -33,7 +31,7 @@ export default function MusicAdminLoginPage() {
     try {
       const response = await login('music', username.trim(), password);
       saveSession('music', response, window.localStorage);
-      router.replace('/music-admin');
+      window.location.replace('/music-admin');
     } catch (reason) {
       setError(reason instanceof Error ? reason.message : '登录失败');
     } finally {

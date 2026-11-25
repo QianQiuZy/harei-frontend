@@ -3,7 +3,7 @@
 import { API_BASE_URL } from '@/lib/api-origin';
 import { request } from '@/lib/member';
 import { beijingGiftMonth } from '@/lib/captaingift-months';
-import Link from 'next/link';
+import DocumentLink from '@/components/DocumentLink';
 import { useEffect, useMemo, useState } from 'react';
 
 type BoxResponse = {
@@ -157,33 +157,33 @@ export default function AdminPage() {
           <p className="admin-subtitle">请选择需要进入的管理模块。</p>
         </div>
         <div className="admin-grid">
-          <Link className="admin-panel-card" href="/admin/message">
+          <DocumentLink className="admin-panel-card" href="/admin/message">
             <div className="admin-panel-title">留言箱</div>
             <div className="admin-panel-subtitle">{pendingText}</div>
-          </Link>
-          <Link className="admin-panel-card" href="/admin/audit">
+          </DocumentLink>
+          <DocumentLink className="admin-panel-card" href="/admin/audit">
             <div className="admin-panel-title">审核界面</div>
             <div className="admin-panel-subtitle">{approvedText}</div>
-          </Link>
-          <Link className="admin-panel-card" href="/admin/tag">
+          </DocumentLink>
+          <DocumentLink className="admin-panel-card" href="/admin/tag">
             <div className="admin-panel-title">tag管理</div>
             <div className="admin-panel-subtitle">{tagText}</div>
-          </Link>
-          <Link className="admin-panel-card" href="/admin/captains">
+          </DocumentLink>
+          <DocumentLink className="admin-panel-card" href="/admin/captains">
             <div className="admin-panel-title">舰长列表</div>
             <div className="admin-panel-subtitle">{captainText}</div>
-          </Link>
-          <Link className="admin-panel-card" href="/admin/captaingift">
+          </DocumentLink>
+          <DocumentLink className="admin-panel-card" href="/admin/captaingift">
             <div className="admin-panel-title">舰礼留档</div>
             <div className="admin-panel-subtitle">{archiveText}</div>
-          </Link>
-          <Link
+          </DocumentLink>
+          <DocumentLink
             className="admin-panel-card"
             href={collection ? `/admin/member-gifts?month=${collection.month}` : '/admin/member-gifts'}
           >
             <div className="admin-panel-title">地址管理</div>
             <div className="admin-panel-subtitle">{collectionText}</div>
-          </Link>
+          </DocumentLink>
         </div>
       </div>
     </section>

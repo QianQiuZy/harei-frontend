@@ -1,7 +1,7 @@
 'use client';
 
-import Link from 'next/link';
-import { usePathname, useRouter } from 'next/navigation';
+import DocumentLink from '@/components/DocumentLink';
+import { usePathname } from 'next/navigation';
 import { ClipboardList, ExternalLink, LayoutDashboard, Library, LogOut } from 'lucide-react';
 import { clearSession, revokeSession, type SessionKind } from '@/lib/auth/session';
 import styles from '../admin.module.css';
@@ -22,39 +22,38 @@ export const MusicAdminShell = ({
   readonly children: React.ReactNode;
 }) => {
   const pathname = usePathname();
-  const router = useRouter();
 
   const logout = async () => {
     try {
       await revokeSession(token);
     } finally {
       clearSession(kind, window.localStorage);
-      router.replace('/music-admin/login');
+      window.location.replace('/music-admin/login');
     }
   };
 
   return (
     <div className={styles.shell}>
       <header className={styles.header}>
-        <Link className={styles.brand} href="/music-admin">
+        <DocumentLink className={styles.brand} href="/music-admin">
           <strong>HAREI SONGBOOK</strong>
           <span>歌单管理</span>
-        </Link>
+        </DocumentLink>
         <nav className={styles.nav} aria-label="歌单管理导航">
           {NAV_ITEMS.map((item) => {
             const Icon = item.icon;
             const active = item.href === '/music-admin' ? pathname === item.href : pathname.startsWith(item.href);
             return (
-              <Link key={item.href} href={item.href} aria-current={active ? 'page' : undefined}>
+              <DocumentLink key={item.href} href={item.href} aria-current={active ? 'page' : undefined}>
                 <Icon aria-hidden="true" size={17} />
                 {item.label}
-              </Link>
+              </DocumentLink>
             );
           })}
-          <Link href="/music" target="_blank" rel="noopener noreferrer">
+          <DocumentLink href="/music" target="_blank" rel="noopener noreferrer">
             <ExternalLink aria-hidden="true" size={17} />
             公开歌单
-          </Link>
+          </DocumentLink>
           <button type="button" onClick={() => void logout()}>
             <LogOut aria-hidden="true" size={17} />
             退出

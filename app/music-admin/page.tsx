@@ -1,7 +1,7 @@
 'use client';
 
 import { Archive, Library, ListMusic } from 'lucide-react';
-import Link from 'next/link';
+import DocumentLink from '@/components/DocumentLink';
 import { useEffect, useState } from 'react';
 import { useMusicAdminSession } from '@/app/music-admin/_components/SessionContext';
 import { getMusicAdminStats } from '@/lib/music-admin/client';
@@ -29,7 +29,7 @@ export default function MusicAdminPage() {
     <section>
       <header className={styles.pageHeading}>
         <div><p>MUSIC OPERATIONS</p><h1>歌单概览</h1></div>
-        <Link className={styles.primaryAction} href="/music-admin/songs/new">新增歌曲</Link>
+        <DocumentLink className={styles.primaryAction} href="/music-admin/songs/new">新增歌曲</DocumentLink>
       </header>
       {error ? <p className={styles.error}>{error}</p> : null}
       <div className={styles.statGrid}>

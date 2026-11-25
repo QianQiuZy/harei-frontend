@@ -1,7 +1,6 @@
 "use client";
 
 import { Archive, RotateCcw, Save } from "lucide-react";
-import { useRouter } from "next/navigation";
 import { useCallback, useEffect, useState } from "react";
 import { PerformanceManager } from "@/app/music-admin/_components/PerformanceManager";
 import { useMusicAdminSession } from "@/app/music-admin/_components/SessionContext";
@@ -28,7 +27,6 @@ const EMPTY_SONG: SongDraft = {
 };
 
 export const SongEditor = ({ songId }: { readonly songId: number | null }) => {
-	const router = useRouter();
 	const { session } = useMusicAdminSession();
 	const [detail, setDetail] = useState<ManagedSongDetail["item"] | null>(null);
 	const [draft, setDraft] = useState<SongDraft>(EMPTY_SONG);
@@ -91,7 +89,7 @@ export const SongEditor = ({ songId }: { readonly songId: number | null }) => {
 				setMessage("歌曲已保存");
 			} else {
 				const createdId = await createSong(session.token, normalized);
-				router.replace(`/music-admin/songs/${createdId}`);
+				window.location.replace(`/music-admin/songs/${createdId}`);
 			}
 		} catch (reason) {
 			if (isMusicVersionConflict(reason)) {

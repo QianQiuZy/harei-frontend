@@ -2,7 +2,6 @@
 
 import { API_BASE_URL } from '@/lib/api-origin';
 import { useRef, useState } from 'react';
-import { useRouter } from 'next/navigation';
 import { useLegacyAdminToken } from '@/lib/auth/useLegacyAdminToken';
 
 type DownloadAddResponse = {
@@ -34,7 +33,6 @@ const getErrorMessage = (data: DownloadAddResponse | null) => {
 };
 
 export default function AdminDownloadPage() {
-  const router = useRouter();
   const token = useLegacyAdminToken();
   const [name, setName] = useState('');
   const [link, setLink] = useState('');
@@ -74,7 +72,7 @@ export default function AdminDownloadPage() {
     }
 
     if (!token) {
-      router.replace('/login');
+      window.location.replace('/login');
       return;
     }
 
