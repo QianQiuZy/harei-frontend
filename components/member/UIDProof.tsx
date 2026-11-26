@@ -18,6 +18,8 @@ type Status = {
   listener: string;
 };
 
+const STATUS_POLL_INTERVAL_MS = 5000;
+
 const listenerLabels: Record<string, string> = {
   offline: '监听尚未启动',
   connecting: '监听正在连接',
@@ -129,7 +131,7 @@ export default function UIDProof({
     let timer: ReturnType<typeof setTimeout>;
     let limitedUntil = 0;
     let lastPollError = '';
-    const read = () => request<Status>('/user-auth/verification-status', { flow });
+    const read = () => request<Status>('/user-auth/verification-status', flow);
     const generate = async () => {
       try {
         return await request<Status>('/user-auth/uid-challenge', { flow });
@@ -175,9 +177,12 @@ export default function UIDProof({
           });
         }
       }
-      if (active) timer = setTimeout(() => void poll(false), 2500);
+      if (active) timer = setTimeout(() => void poll(false), STATUS_POLL_INTERVAL_MS);
     };
-    void poll(true);
+    // Skip the initial read if React immediately replays this effect in development.
+    queueMicrotask(() => {
+      if (active) void poll(true);
+    });
     return () => {
       active = false;
       clearTimeout(timer);
@@ -257,7 +262,7 @@ export default function UIDProof({
                 >
                   花礼直播间
                 </a>
-                发送此验证码。
+                发送下方 8 位数字验证码。
               </p>
               <div className={s.codeRow}>
                 <code ref={codeElement}>{activeCode}</code>

@@ -100,17 +100,22 @@ export async function memberFetch(
   method?: string,
   adminToken?: string
 ) {
-  const headers: Record<string, string> = { 'X-Harei-Request': '1' };
+  const requestMethod = method ?? (data === undefined ? 'GET' : 'POST');
+  const profileRead = requestMethod.toUpperCase() === 'GET' && (path === '/me' || path === '/me/account');
+  const statusRead = requestMethod.toUpperCase() === 'POST' &&
+    path === '/user-auth/verification-status' && typeof data === 'string';
+  const headers: Record<string, string> = profileRead || statusRead ? {} : { 'X-Harei-Request': '1' };
   const multipart = data instanceof FormData;
-  if (data !== undefined && !multipart) headers['Content-Type'] = 'application/json';
+  if (statusRead) headers['Content-Type'] = 'text/plain';
+  else if (data !== undefined && !multipart) headers['Content-Type'] = 'application/json';
   if (adminToken) headers.Authorization = 'Bearer ' + adminToken;
   const res = await fetch(API_BASE_URL + path, {
-    method: method ?? (data === undefined ? 'GET' : 'POST'),
+    method: requestMethod,
     headers,
     credentials: 'include',
     cache: 'no-store',
     redirect: 'error',
-    body: multipart ? data : data === undefined ? undefined : JSON.stringify(data)
+    body: statusRead || multipart ? data : data === undefined ? undefined : JSON.stringify(data)
   });
   if (!res.ok) {
     const error = await res.json().catch(() => ({}));
